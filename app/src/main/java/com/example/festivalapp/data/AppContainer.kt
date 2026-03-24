@@ -9,6 +9,7 @@ import com.example.festivalapp.data.user.room.UserRepository
 interface AppContainer {
     val UserRepository: UserRepository
     val authRepository: AuthRepository
+    val apiService: APIService
 }
 
 /**
@@ -26,5 +27,8 @@ class AppDataContainer(private val context: Context) : AppContainer {
     }
     override val authRepository: AuthRepository by lazy {
         AuthRepository(RetrofitInstance.api, UserPreferencesDs(context))
+    }
+    override val apiService: APIService by lazy {
+        RetrofitInstance.api
     }
 }

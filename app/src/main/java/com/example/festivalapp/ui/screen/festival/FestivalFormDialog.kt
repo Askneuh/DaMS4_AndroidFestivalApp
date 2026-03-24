@@ -2,6 +2,7 @@ package com.example.festivalapp.ui.screen.festival
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
@@ -26,7 +27,7 @@ fun FestivalFormDialog(
     var festivalName by remember { mutableStateOf(festival?.name ?: "") }
     var beginDate by remember { mutableStateOf(festival?.beginDate ?: "") }
     var endDate by remember { mutableStateOf(festival?.endDate ?: "") }
-    var zones by remember { mutableStateOf(festival?.tariffZones?.toMutableList() ?: mutableListOf()) }
+    var zones by remember { mutableStateOf(festival?.tariffZones?.toList() ?: emptyList()) }
     var errorMessage by remember { mutableStateOf<String?>(null) }
 
     AlertDialog(
@@ -94,7 +95,9 @@ fun FestivalFormDialog(
 
                 Button(
                     onClick = {
-                        zones.add(TariffZone(idTZ = zones.size + 1, festivalName = festivalName))
+                        zones = zones.toMutableList().apply {
+                            add(TariffZone(idTZ = size + 1, festivalName = festivalName))
+                        }
                     },
                     modifier = Modifier
                         .fillMaxWidth()
@@ -183,7 +186,8 @@ fun TariffZoneFormField(
                 OutlinedTextField(
                     value = zone.nbSmallTables.toString(),
                     onValueChange = {
-                        onZoneChange(zone.copy(nbSmallTables = it.toIntOrNull() ?: 0, remainingSmallTables = it.toIntOrNull() ?: 0))
+                        val value = it.toIntOrNull() ?: 0
+                        onZoneChange(zone.copy(nbSmallTables = value, remainingSmallTables = value))
                     },
                     label = { Text("Petites") },
                     modifier = Modifier.weight(1f)
@@ -191,7 +195,8 @@ fun TariffZoneFormField(
                 OutlinedTextField(
                     value = zone.nbLargeTables.toString(),
                     onValueChange = {
-                        onZoneChange(zone.copy(nbLargeTables = it.toIntOrNull() ?: 0, remainingLargeTables = it.toIntOrNull() ?: 0))
+                        val value = it.toIntOrNull() ?: 0
+                        onZoneChange(zone.copy(nbLargeTables = value, remainingLargeTables = value))
                     },
                     label = { Text("Grandes") },
                     modifier = Modifier.weight(1f)
@@ -199,7 +204,8 @@ fun TariffZoneFormField(
                 OutlinedTextField(
                     value = zone.nbCityHallTables.toString(),
                     onValueChange = {
-                        onZoneChange(zone.copy(nbCityHallTables = it.toIntOrNull() ?: 0, remainingCityHallTables = it.toIntOrNull() ?: 0))
+                        val value = it.toIntOrNull() ?: 0
+                        onZoneChange(zone.copy(nbCityHallTables = value, remainingCityHallTables = value))
                     },
                     label = { Text("Mairie") },
                     modifier = Modifier.weight(1f)
