@@ -16,6 +16,7 @@
 
 package com.example.inventory.data
 
+import com.example.festivalapp.data.example.Item
 import kotlinx.coroutines.flow.Flow
 
 /**
