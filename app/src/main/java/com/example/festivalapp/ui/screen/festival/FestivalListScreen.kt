@@ -50,7 +50,6 @@ fun FestivalListScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(paddingValues)
-                .verticalScroll(rememberScrollState())
         ) {
             Text(
                 text = "Liste des Festivals",
@@ -106,6 +105,7 @@ fun FestivalListScreen(
                     columns = GridCells.Fixed(2),
                     modifier = Modifier
                         .fillMaxWidth()
+                        .weight(1f)
                         .padding(horizontal = 8.dp),
                     contentPadding = PaddingValues(8.dp),
                     horizontalArrangement = Arrangement.spacedBy(8.dp),
