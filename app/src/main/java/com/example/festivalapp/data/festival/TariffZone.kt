@@ -1,5 +1,8 @@
 package com.example.festivalapp.data.festival
 
+import kotlinx.serialization.Serializable
+
+@Serializable
 data class TariffZone(
     val idTZ: Int = 0,
     val name: String = "",

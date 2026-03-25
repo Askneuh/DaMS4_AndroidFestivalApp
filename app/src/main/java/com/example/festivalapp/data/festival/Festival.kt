@@ -1,5 +1,8 @@
 package com.example.festivalapp.data.festival
 
+import kotlinx.serialization.Serializable
+
+@Serializable
 data class Festival(
     val name: String = "",
     val nbSmallTables: Int = 0,
