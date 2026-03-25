@@ -50,6 +50,7 @@ fun FestivalListScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(paddingValues)
+                .verticalScroll(rememberScrollState())
         ) {
             Text(
                 text = "Liste des Festivals",
@@ -105,7 +106,6 @@ fun FestivalListScreen(
                     columns = GridCells.Fixed(2),
                     modifier = Modifier
                         .fillMaxWidth()
-                        .weight(1f)
                         .padding(horizontal = 8.dp),
                     contentPadding = PaddingValues(8.dp),
                     horizontalArrangement = Arrangement.spacedBy(8.dp),
@@ -209,13 +209,17 @@ private suspend fun updateFestival(
     apiService: APIService
 ) {
     viewModel.setLoading(true)
+    println("🔄 Modification festival: ${festival.name} (original: $originalName)")
     try {
         val updatedFestival = apiService.updateFestivalByName(originalName, festival)
+        println("✅ Festival modifié: ${updatedFestival.name}")
         viewModel.setSuccessMessage("Festival mis à jour avec succès!")
         viewModel.closeForm()
         viewModel.setLoading(false)
         loadFestivals(viewModel, apiService, kotlinx.coroutines.GlobalScope)
     } catch (e: Exception) {
+        println("❌ Erreur modification: ${e.message}")
+        println("❌ Stack trace: ${e.stackTraceToString()}")
         viewModel.setError(e.message ?: "Erreur lors de la modification")
         viewModel.setLoading(false)
     }
