@@ -31,11 +31,11 @@ fun FestivalListScreen(
 ) {
     val uiState by viewModel.uiState.collectAsState()
     val scope = rememberCoroutineScope()
-
+    
     LaunchedEffect(Unit) {
         loadFestivals(viewModel, apiService, scope)
     }
-
+    
     Scaffold(
         floatingActionButton = {
             FloatingActionButton(
@@ -58,7 +58,6 @@ fun FestivalListScreen(
                 fontWeight = FontWeight.Bold,
                 modifier = Modifier.padding(16.dp)
             )
-
             if (uiState.successMessage != null) {
                 Card(
                     modifier = Modifier
@@ -74,7 +73,6 @@ fun FestivalListScreen(
                     )
                 }
             }
-
             if (uiState.error != null) {
                 Card(
                     modifier = Modifier
@@ -90,7 +88,6 @@ fun FestivalListScreen(
                     )
                 }
             }
-
             if (uiState.isLoading && uiState.festivals.isEmpty()) {
                 CircularProgressIndicator(
                     modifier = Modifier
@@ -134,27 +131,27 @@ fun FestivalListScreen(
                 }
             }
         }
-
-        if (uiState.showForm) {
-            FestivalFormDialog(
-                festival = uiState.selectedFestival,
-                isEditMode = uiState.isEditMode,
-                onDismiss = { viewModel.closeForm() },
-                onSave = { festival ->
-                    scope.launch {
-                        if (uiState.isEditMode && uiState.selectedFestival != null) {
-                            updateFestival(uiState.selectedFestival!!.name, festival, viewModel, apiService)
-                        } else {
-                            createFestival(festival, viewModel, apiService)
-                        }
+    }
+    
+    if (uiState.showForm) {
+        FestivalFormDialog(
+            festival = uiState.selectedFestival,
+            isEditMode = uiState.isEditMode,
+            onDismiss = { viewModel.closeForm() },
+            onSave = { festival ->
+                scope.launch {
+                    if (uiState.isEditMode && uiState.selectedFestival != null) {
+                        updateFestival(uiState.selectedFestival!!.name, festival, viewModel, apiService)
+                    } else {
+                        createFestival(festival, viewModel, apiService)
                     }
-                },
-                onCalculateRemaining = { viewModel.calculateRemainingTables(it) },
-                onPrepareFestival = { name, zones, begin, end ->
-                    viewModel.prepareFestivalForSave(name, zones, begin, end)
                 }
-            )
-        }
+            },
+            onCalculateRemaining = { viewModel.calculateRemainingTables(it) },
+            onPrepareFestival = { name, zones, begin, end ->
+                viewModel.prepareFestivalForSave(name, zones, begin, end)
+            }
+        )
     }
 }
 
@@ -202,5 +199,112 @@ private suspend fun createFestival(
         println("❌ Stack trace: ${e.stackTraceToString()}")
         viewModel.setError(e.message ?: "Erreur lors de la création")
         viewModel.setLoading(false)
+    }
+}
+
+private suspend fun updateFestival(
+    originalName: String,
+    festival: Festival,
+    viewModel: FestivalViewModel,
+    apiService: APIService
+) {
+    viewModel.setLoading(true)
+    try {
+        val updatedFestival = apiService.updateFestivalByName(originalName, festival)
+        viewModel.setSuccessMessage("Festival mis à jour avec succès!")
+        viewModel.closeForm()
+        viewModel.setLoading(false)
+        loadFestivals(viewModel, apiService, kotlinx.coroutines.GlobalScope)
+    } catch (e: Exception) {
+        viewModel.setError(e.message ?: "Erreur lors de la modification")
+        viewModel.setLoading(false)
+    }
+}
+
+private suspend fun deleteFestival(
+    name: String,
+    viewModel: FestivalViewModel,
+    apiService: APIService
+) {
+    viewModel.setLoading(true)
+    try {
+        apiService.deleteFestival(name)
+        viewModel.setSuccessMessage("Festival supprimé avec succès!")
+        viewModel.setLoading(false)
+        loadFestivals(viewModel, apiService, kotlinx.coroutines.GlobalScope)
+    } catch (e: Exception) {
+        viewModel.setError(e.message ?: "Erreur lors de la suppression")
+        viewModel.setLoading(false)
+    }
+}
+
+private suspend fun setCurrentFestival(
+    name: String,
+    viewModel: FestivalViewModel,
+    apiService: APIService
+) {
+    viewModel.setLoading(true)
+    try {
+        val festival = apiService.setCurrentFestival(name)
+        viewModel.setSuccessMessage("Le festival \"$name\" est désormais le festival courant!")
+        viewModel.setCurrentFestival(festival)
+        viewModel.setLoading(false)
+        loadFestivals(viewModel, apiService, kotlinx.coroutines.GlobalScope)
+    } catch (e: Exception) {
+        viewModel.setError(e.message ?: "Erreur")
+        viewModel.setLoading(false)
+    }
+}
+
+@Composable
+fun FestivalCard(
+    festival: Festival,
+    isCurrent: Boolean,
+    onEdit: () -> Unit,
+    onDelete: () -> Unit,
+    onMakeCurrent: () -> Unit
+) {
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .then(if (isCurrent) Modifier.border(2.dp, MaterialTheme.colorScheme.primary) else Modifier),
+        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
+    ) {
+        Column(modifier = Modifier.padding(12.dp)) {
+            Text(
+                text = festival.name,
+                fontWeight = FontWeight.Bold,
+                fontSize = 16.sp,
+                modifier = Modifier.padding(bottom = 8.dp)
+            )
+            if (isCurrent) {
+                AssistChip(
+                    onClick = {},
+                    label = { Text("Festival courant", fontSize = 10.sp) },
+                    modifier = Modifier.padding(bottom = 8.dp)
+                )
+            }
+            Text(text = "Petites tables: ${festival.nbSmallTables}", fontSize = 12.sp)
+            Text(text = "Grandes tables: ${festival.nbLargeTables}", fontSize = 12.sp)
+            Text(text = "Tables mairie: ${festival.nbCityHallTables}", fontSize = 12.sp)
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(top = 8.dp),
+                horizontalArrangement = Arrangement.spacedBy(4.dp)
+            ) {
+                IconButton(onClick = onEdit, modifier = Modifier.size(32.dp)) {
+                    Icon(Icons.Default.Edit, contentDescription = "Modifier", tint = MaterialTheme.colorScheme.primary)
+                }
+                IconButton(onClick = onDelete, modifier = Modifier.size(32.dp)) {
+                    Icon(Icons.Default.Delete, contentDescription = "Supprimer", tint = MaterialTheme.colorScheme.error)
+                }
+            }
+            if (!isCurrent) {
+                Button(onClick = onMakeCurrent, modifier = Modifier.fillMaxWidth().padding(top = 8.dp)) {
+                    Text("Courant")
+                }
+            }
+        }
     }
 }
