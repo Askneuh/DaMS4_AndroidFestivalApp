@@ -50,7 +50,7 @@ fun FestivalListScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(paddingValues)
-                .verticalScroll(rememberScrollState())
+                
         ) {
             Text(
                 text = "Liste des Festivals",
