@@ -1,5 +1,6 @@
 package com.example.festivalapp.api
 
+import com.example.festivalapp.data.example.Item
 import retrofit2.http.POST
 import retrofit2.http.Body
 import retrofit2.http.GET
