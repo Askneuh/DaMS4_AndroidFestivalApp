@@ -29,7 +29,7 @@ fun FestivalFormDialog(
     var endDate by remember { mutableStateOf(festival?.endDate ?: "") }
     var zones by remember { mutableStateOf(festival?.tariffZones?.toList() ?: emptyList()) }
     var errorMessage by remember { mutableStateOf<String?>(null) }
-
+    
     AlertDialog(
         onDismissRequest = onDismiss,
         modifier = Modifier.fillMaxWidth(0.9f),
@@ -49,7 +49,6 @@ fun FestivalFormDialog(
                         .padding(bottom = 12.dp),
                     isError = festivalName.isEmpty()
                 )
-
                 OutlinedTextField(
                     value = beginDate,
                     onValueChange = { beginDate = it },
@@ -58,7 +57,6 @@ fun FestivalFormDialog(
                         .fillMaxWidth()
                         .padding(bottom = 12.dp)
                 )
-
                 OutlinedTextField(
                     value = endDate,
                     onValueChange = { endDate = it },
@@ -67,13 +65,11 @@ fun FestivalFormDialog(
                         .fillMaxWidth()
                         .padding(bottom = 12.dp)
                 )
-
                 Text(
                     text = "Zones tarifaires",
                     style = MaterialTheme.typography.titleMedium,
                     modifier = Modifier.padding(bottom = 12.dp)
                 )
-
                 if (zones.isEmpty()) {
                     Text(
                         text = "Au moins une zone tarifaire est requise",
@@ -82,7 +78,6 @@ fun FestivalFormDialog(
                         modifier = Modifier.padding(bottom = 12.dp)
                     )
                 }
-
                 zones.forEachIndexed { index, zone ->
                     TariffZoneFormField(
                         zone = zone,
@@ -92,7 +87,6 @@ fun FestivalFormDialog(
                         onRemove = { zones = zones.toMutableList().apply { removeAt(index) } }
                     )
                 }
-
                 Button(
                     onClick = {
                         zones = zones.toMutableList().apply {
@@ -107,7 +101,6 @@ fun FestivalFormDialog(
                     Icon(Icons.Default.Add, contentDescription = null, modifier = Modifier.padding(end = 4.dp))
                     Text("Ajouter une zone")
                 }
-
                 if (errorMessage != null) {
                     Text(
                         text = errorMessage!!,
@@ -121,18 +114,40 @@ fun FestivalFormDialog(
         confirmButton = {
             Button(
                 onClick = {
+                    // Validation du nom
                     if (festivalName.isBlank()) {
                         errorMessage = "Le nom du festival est requis"
                         return@Button
                     }
+                    // Validation des zones
                     if (zones.isEmpty()) {
                         errorMessage = "Au moins une zone tarifaire est requise"
                         return@Button
                     }
-
-                    val prepared = onPrepareFestival(festivalName, zones, beginDate.ifBlank { null }, endDate.ifBlank { null })
+                    // Validation que chaque zone a au moins une table
+                    val hasInvalidZone = zones.any { zone ->
+                        zone.nbSmallTables == 0 && 
+                        zone.nbLargeTables == 0 && 
+                        zone.nbCityHallTables == 0
+                    }
+                    if (hasInvalidZone) {
+                        errorMessage = "Chaque zone doit avoir au moins une table"
+                        return@Button
+                    }
+                    
+                    // Si tout est valide, réinitialise le message d'erreur
+                    errorMessage = null
+                    
+                    // Prépare et sauvegarde le festival
+                    val prepared = onPrepareFestival(
+                        festivalName, 
+                        zones, 
+                        beginDate.ifBlank { null }, 
+                        endDate.ifBlank { null }
+                    )
                     onSave(prepared)
-                }
+                },
+                enabled = festivalName.isNotBlank() && zones.isNotEmpty()
             ) {
                 Text(if (isEditMode) "Modifier" else "Créer")
             }
@@ -172,7 +187,6 @@ fun TariffZoneFormField(
                     Icon(Icons.Default.Close, contentDescription = "Supprimer")
                 }
             }
-
             OutlinedTextField(
                 value = zone.name,
                 onValueChange = { onZoneChange(zone.copy(name = it)) },
@@ -181,7 +195,6 @@ fun TariffZoneFormField(
                     .fillMaxWidth()
                     .padding(bottom = 8.dp)
             )
-
             Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 OutlinedTextField(
                     value = zone.nbSmallTables.toString(),
@@ -211,7 +224,6 @@ fun TariffZoneFormField(
                     modifier = Modifier.weight(1f)
                 )
             }
-
             Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 OutlinedTextField(
                     value = zone.smallTablePrice.toString(),
@@ -226,7 +238,6 @@ fun TariffZoneFormField(
                     modifier = Modifier.weight(1f)
                 )
             }
-
             OutlinedTextField(
                 value = zone.cityHallTablePrice.toString(),
                 onValueChange = { onZoneChange(zone.copy(cityHallTablePrice = it.toDoubleOrNull() ?: 0.0)) },
@@ -235,7 +246,6 @@ fun TariffZoneFormField(
                     .fillMaxWidth()
                     .padding(bottom = 8.dp)
             )
-
             OutlinedTextField(
                 value = zone.squareMeterPrice.toString(),
                 onValueChange = { onZoneChange(zone.copy(squareMeterPrice = it.toDoubleOrNull() ?: 0.0)) },
