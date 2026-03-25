@@ -209,17 +209,13 @@ private suspend fun updateFestival(
     apiService: APIService
 ) {
     viewModel.setLoading(true)
-    println("🔄 Modification festival: ${festival.name} (original: $originalName)")
     try {
         val updatedFestival = apiService.updateFestivalByName(originalName, festival)
-        println("✅ Festival modifié: ${updatedFestival.name}")
         viewModel.setSuccessMessage("Festival mis à jour avec succès!")
         viewModel.closeForm()
         viewModel.setLoading(false)
         loadFestivals(viewModel, apiService, kotlinx.coroutines.GlobalScope)
     } catch (e: Exception) {
-        println("❌ Erreur modification: ${e.message}")
-        println("❌ Stack trace: ${e.stackTraceToString()}")
         viewModel.setError(e.message ?: "Erreur lors de la modification")
         viewModel.setLoading(false)
     }
