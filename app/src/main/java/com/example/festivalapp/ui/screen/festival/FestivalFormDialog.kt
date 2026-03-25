@@ -137,6 +137,8 @@ fun FestivalFormDialog(
                     
                     // Si tout est valide, réinitialise le message d'erreur
                     errorMessage = null
+                    println("✅ Festival préparé: $prepared")
+                    println("✅ onSave appelé avec: $prepared")
                     
                     // Prépare et sauvegarde le festival
                     val prepared = onPrepareFestival(
@@ -147,9 +149,7 @@ fun FestivalFormDialog(
                     )
                     onSave(prepared)
 
-                    // Ajoute ces logs
-                    println("✅ Festival préparé: $prepared")
-                    println("✅ onSave appelé avec: $prepared")
+                    
                 },
                 enabled = festivalName.isNotBlank() && zones.isNotEmpty()
             ) {
