@@ -29,9 +29,9 @@ fun FestivalFormDialog(
     var endDate by remember { mutableStateOf(festival?.endDate ?: "") }
     var zones by remember { mutableStateOf(festival?.tariffZones?.toList() ?: emptyList()) }
     var errorMessage by remember { mutableStateOf<String?>(null) }
-    
+
     AlertDialog(
-        onDismissRequest = onDismiss,
+        onDismissRequest = { onDismiss() },  // ✅ CHANGEMENT: onDismiss() au lieu de onDismiss
         modifier = Modifier.fillMaxWidth(0.9f),
         title = { Text(if (isEditMode) "Modifier le festival" else "Créer un festival") },
         text = {
@@ -137,8 +137,6 @@ fun FestivalFormDialog(
                     
                     // Si tout est valide, réinitialise le message d'erreur
                     errorMessage = null
-                    println("✅ Festival préparé: $prepared")
-                    println("✅ onSave appelé avec: $prepared")
                     
                     // Prépare et sauvegarde le festival
                     val prepared = onPrepareFestival(
@@ -147,9 +145,9 @@ fun FestivalFormDialog(
                         beginDate.ifBlank { null }, 
                         endDate.ifBlank { null }
                     )
+                    println("✅ Festival préparé: $prepared")
+                    println("✅ onSave appelé avec: $prepared")
                     onSave(prepared)
-
-                    
                 },
                 enabled = festivalName.isNotBlank() && zones.isNotEmpty()
             ) {
