@@ -12,9 +12,9 @@ data class TariffZone(
     val remainingSmallTables: Int = 0,
     val remainingLargeTables: Int = 0,
     val remainingCityHallTables: Int = 0,
-    val smallTablePrice: Double = 0.0,
-    val largeTablePrice: Double = 0.0,
-    val cityHallTablePrice: Double = 0.0,
+    val smallTablePrice: Double? = null,
+    val largeTablePrice: Double? = null,
+    val cityHallTablePrice: Double? = null,
     val squareMeterPrice: Double? = null,
     val festivalName: String = ""
 )

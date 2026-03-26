@@ -15,7 +15,6 @@ class FestivalViewModel : ViewModel() {
     private val _uiState = MutableStateFlow(FestivalUiState())
     val uiState: StateFlow<FestivalUiState> = _uiState.asStateFlow()
 
-    // ========== MÉTIERS ==========
 
     fun prepareFestivalForSave(
         name: String,
@@ -74,7 +73,7 @@ class FestivalViewModel : ViewModel() {
         )
     }
 
-    // ========== STATE MANAGEMENT ==========
+    
 
     fun openForm(festival: Festival? = null) {
         _uiState.update {

@@ -31,7 +31,7 @@ fun FestivalFormDialog(
     var errorMessage by remember { mutableStateOf<String?>(null) }
 
     AlertDialog(
-        onDismissRequest = { onDismiss() },  // ✅ CHANGEMENT: onDismiss() au lieu de onDismiss
+        onDismissRequest = { onDismiss() },  
         modifier = Modifier.fillMaxWidth(0.9f),
         title = { Text(if (isEditMode) "Modifier le festival" else "Créer un festival") },
         text = {
