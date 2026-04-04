@@ -23,7 +23,6 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.festivalapp.data.auth.AuthRepository
-import com.example.festivalapp.data.datastore.UserPreferencesDs
 import com.example.festivalapp.ui.theme.FestivalAppTheme
 
 @Composable
@@ -165,11 +164,7 @@ fun LoginRoute(
     authRepository: AuthRepository,
     onLoginSuccess: () -> Unit = {}
 ) {
-    val context = LocalContext.current
-    val factory = LoginViewModelFactory(
-        authRepository,
-        UserPreferencesDs(context)
-    )
+    val factory = LoginViewModelFactory(authRepository)
     val loginViewModel: LoginViewModel = viewModel(factory = factory)
 
     LoginScreen(

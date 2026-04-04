@@ -3,13 +3,12 @@ package com.example.festivalapp.ui.screen.login
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.festivalapp.data.auth.AuthRepository
-import com.example.festivalapp.data.datastore.UserPreferencesDs
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 
 
-class LoginViewModel(private val repository: AuthRepository, private val userPreferences: UserPreferencesDs) : ViewModel() {
+class LoginViewModel(private val repository: AuthRepository) : ViewModel() {
 
     private val _loginState = MutableStateFlow<LoginResult?>(null)
     val loginState = _loginState.asStateFlow()
