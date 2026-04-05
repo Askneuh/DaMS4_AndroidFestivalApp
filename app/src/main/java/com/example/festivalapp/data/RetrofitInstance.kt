@@ -1,5 +1,6 @@
 package com.example.festivalapp.data
 
+import com.example.festivalapp.data.editor.retrofit.EditorApiService
 import com.example.festivalapp.data.reservation.retrofit.ReservationApiService
 import com.example.festivalapp.data.user.retrofit.UserApiService
 import okhttp3.MediaType.Companion.toMediaType
@@ -35,6 +36,10 @@ object RetrofitInstance {
 
     val reservationApi: ReservationApiService by lazy {
         retrofit.create(ReservationApiService::class.java)
+    }
+
+    val editorApi: EditorApiService by lazy {
+        retrofit.create(EditorApiService::class.java)
     }
 
 }
