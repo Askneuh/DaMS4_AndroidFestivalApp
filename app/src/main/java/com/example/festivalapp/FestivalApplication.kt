@@ -4,38 +4,37 @@ import android.app.Application
 import android.content.Context
 import androidx.datastore.preferences.preferencesDataStore
 import com.example.festivalapp.data.APIService
+import com.example.festivalapp.data.AppContainer
+import com.example.festivalapp.data.AppDataContainer
+import com.example.festivalapp.data.FestivalDatabase
 import com.example.festivalapp.data.RetrofitInstance
 import com.example.festivalapp.data.auth.AuthRepository
 import com.example.festivalapp.data.session.DataStoreCookieJar
 import com.example.festivalapp.data.session.SessionRepository
+import com.example.festivalapp.data.user.room.DefaultUserRepository
+import com.example.festivalapp.data.user.room.UserRepository
 import okhttp3.OkHttpClient
 import java.security.KeyStore
-import java.security.SecureRandom
 import java.security.cert.CertificateFactory
 import java.util.concurrent.TimeUnit
-import javax.net.ssl.KeyManagerFactory
 import javax.net.ssl.SSLContext
 import javax.net.ssl.TrustManagerFactory
 import javax.net.ssl.X509TrustManager
 
 
-private const val SESSION_PREFERENCE_NAME = "app_session"
-private val Context.dataStore by preferencesDataStore(name = SESSION_PREFERENCE_NAME)
+
 
 class FestivalApplication : Application() {
-    lateinit var sessionRepository: SessionRepository
+    lateinit var container: AppContainer
     lateinit var cookieJar: DataStoreCookieJar
-    lateinit var apiService: APIService
-    lateinit var authRepository: AuthRepository
+
 
     override fun onCreate() {
         super.onCreate()
-        sessionRepository = SessionRepository(dataStore)
-        cookieJar = DataStoreCookieJar(sessionRepository)
+        container = AppDataContainer(this)
+        cookieJar = DataStoreCookieJar(container.sessionRepository)
         val okHttpClient = generateSecureOkHttpClient()
         RetrofitInstance.okHttpClient = okHttpClient
-        apiService = RetrofitInstance.api
-        authRepository = AuthRepository(apiService, sessionRepository)
     }
 
     private fun generateSecureOkHttpClient(): OkHttpClient {

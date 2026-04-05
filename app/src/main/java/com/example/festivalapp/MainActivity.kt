@@ -11,15 +11,22 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.festivalapp.data.AppDataContainer
+import com.example.festivalapp.ui.screen.admin.users.AdminUserListRoute
 import com.example.festivalapp.ui.screen.login.LoginRoute
 import com.example.festivalapp.ui.screen.login.LoginScreen
 import com.example.festivalapp.ui.screen.login.LoginScreenContent
 import com.example.festivalapp.ui.screen.login.LoginViewModel
 import com.example.festivalapp.ui.screen.login.LoginViewModelFactory
+import com.example.festivalapp.ui.screen.reservation.ReservationListRoute
 import com.example.festivalapp.ui.theme.FestivalAppTheme
+import kotlinx.coroutines.launch
 import java.lang.reflect.Modifier
 
 
@@ -33,15 +40,28 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             FestivalAppTheme {
-                LoginRoute(
-                    authRepository = app.authRepository,
-                    onLoginSuccess = {
-                        Toast.makeText(this@MainActivity, "Connexion réussie !", Toast.LENGTH_SHORT)
-                            .show()
-                    }
-                )
+                val role by app.container.sessionRepository.roleFlow.collectAsState(initial = null)
+
+                if (role != null) {
+                    val scope = rememberCoroutineScope()
+                    ReservationListRoute(
+                        reservationRepository = app.container.reservationRepository,
+                        festivalName = "Festival-Nouveau",
+                        onLogoutClick = {
+                            scope.launch {
+                                app.container.sessionRepository.clearSession()
+                            }
+                        }
+                    )
+                    
+                } else {
+                    LoginRoute(
+                        onLoginSuccess = {}  // ← vide ! Le Flow gère la navigation automatiquement
+                    )
+                }
             }
         }
+
     }
 
 }
