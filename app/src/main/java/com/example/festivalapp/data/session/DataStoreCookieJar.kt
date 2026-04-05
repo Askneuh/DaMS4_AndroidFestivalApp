@@ -15,6 +15,10 @@ class DataStoreCookieJar(private val sessionRepository: SessionRepository) : Coo
         val refreshValue = runBlocking {
             sessionRepository.refreshCookieFlow.first()
         }
+        println("===== TEST COOKIE JAR =====")
+        println("Requête vers : $url")
+        println("Access Token en stock : ${if (accessValue != null) "OUI, IL EST LÀ" else "VIDE !! DANGER !"}")
+        println("===========================")
 
         val cookies = mutableListOf<Cookie>()
 
@@ -23,7 +27,7 @@ class DataStoreCookieJar(private val sessionRepository: SessionRepository) : Coo
                 Cookie.Builder()
                     .name("access_token")
                     .value(accessValue)
-                    .domain("162.38.111.35")
+                    .domain(url.host)
                     .path("/")
                     .secure()
                     .httpOnly()
@@ -36,7 +40,7 @@ class DataStoreCookieJar(private val sessionRepository: SessionRepository) : Coo
                 Cookie.Builder()
                     .name("refresh_token")
                     .value(refreshValue)
-                    .domain("162.38.111.35")
+                    .domain(url.host)
                     .path("/")
                     .secure()
                     .httpOnly()

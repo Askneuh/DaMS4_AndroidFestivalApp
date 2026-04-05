@@ -22,6 +22,7 @@ import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.festivalapp.AppViewModelProvider
 import com.example.festivalapp.data.auth.AuthRepository
 import com.example.festivalapp.ui.theme.FestivalAppTheme
 
@@ -161,11 +162,9 @@ fun LoginScreenContent(
 
 @Composable
 fun LoginRoute(
-    authRepository: AuthRepository,
     onLoginSuccess: () -> Unit = {}
 ) {
-    val factory = LoginViewModelFactory(authRepository)
-    val loginViewModel: LoginViewModel = viewModel(factory = factory)
+    val loginViewModel: LoginViewModel = viewModel(factory = AppViewModelProvider.Factory)
 
     LoginScreen(
         viewModel = loginViewModel,
