@@ -31,7 +31,9 @@ class FestivalViewModel : ViewModel() {
             totalLarge += zone.nbLargeTables ?: 0
             totalCityHall += zone.nbCityHallTables ?: 0
         }
-
+        val zonesWithName = tariffZones.map { zone ->
+            zone.copy(festivalName = name)  // ajoute le nom du festival à chaque zone
+        }
         return Festival(
             name = name,
             nbSmallTables = totalSmall,
@@ -41,7 +43,7 @@ class FestivalViewModel : ViewModel() {
             remainingLargeTables = totalLarge,
             remainingCityHallTables = totalCityHall,
             isCurrent = false,
-            tariffZones = tariffZones,
+            tariffZones = zonesWithName,
             beginDate = beginDate,
             endDate = endDate
         )
