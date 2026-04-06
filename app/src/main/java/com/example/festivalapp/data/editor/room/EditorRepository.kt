@@ -1,13 +1,12 @@
-package com.example.festivalapp.data.editor
+package com.example.festivalapp.data.editor.room
 
 import com.example.festivalapp.data.contact.room.Contact
 import com.example.festivalapp.data.contact.room.ContactDAO
 import com.example.festivalapp.data.editor.retrofit.EditorApiService
-import com.example.festivalapp.data.editor.room.Editor
-import com.example.festivalapp.data.editor.room.EditorDAO
 import com.example.festivalapp.data.game.room.Game
 import com.example.festivalapp.data.game.room.GameDAO
 import kotlinx.coroutines.flow.Flow
+import retrofit2.HttpException
 
 class EditorRepository(
     private val editorDAO: EditorDAO,
@@ -42,7 +41,7 @@ class EditorRepository(
             gameDAO.insertAll(dtoList.map { it.toRoom() })
         } catch (e: Exception) {
             // Si c'est une 404, on ignore (pas de jeux), sinon on remonte l'erreur
-            if (e is retrofit2.HttpException && e.code() == 404) return
+            if (e is HttpException && e.code() == 404) return
             throw e
         }
     }
@@ -53,7 +52,7 @@ class EditorRepository(
             contactDAO.insertAll(dtoList.map { it.toRoom() })
         } catch (e: Exception) {
             // Idem pour les contacts
-            if (e is retrofit2.HttpException && e.code() == 404) return
+            if (e is HttpException && e.code() == 404) return
             throw e
         }
     }

@@ -16,7 +16,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.festivalapp.data.contact.room.Contact
-import com.example.festivalapp.data.editor.EditorRepository
+import com.example.festivalapp.data.editor.room.EditorRepository
 import com.example.festivalapp.data.game.room.Game
 
 @OptIn(ExperimentalMaterial3Api::class)

@@ -9,7 +9,7 @@ import com.example.festivalapp.data.session.SessionRepository
 import com.example.festivalapp.data.session.sessionDataStore
 import com.example.festivalapp.data.user.room.DefaultUserRepository
 import com.example.festivalapp.data.user.room.UserRepository
-import com.example.festivalapp.data.editor.EditorRepository
+import com.example.festivalapp.data.editor.room.EditorRepository
 
 interface AppContainer {
     val sessionRepository: SessionRepository

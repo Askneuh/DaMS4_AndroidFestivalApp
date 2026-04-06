@@ -15,7 +15,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.example.festivalapp.data.editor.EditorRepository
+import com.example.festivalapp.data.editor.room.EditorRepository
 import com.example.festivalapp.data.editor.room.Editor
 
 @OptIn(ExperimentalMaterial3Api::class)

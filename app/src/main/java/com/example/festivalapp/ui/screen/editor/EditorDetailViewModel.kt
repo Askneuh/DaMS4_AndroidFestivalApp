@@ -3,7 +3,7 @@ package com.example.festivalapp.ui.screen.editor
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.festivalapp.data.contact.room.Contact
-import com.example.festivalapp.data.editor.EditorRepository
+import com.example.festivalapp.data.editor.room.EditorRepository
 import com.example.festivalapp.data.editor.room.Editor
 import com.example.festivalapp.data.game.room.Game
 import kotlinx.coroutines.flow.MutableStateFlow
