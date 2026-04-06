@@ -27,9 +27,9 @@ class FestivalViewModel : ViewModel() {
         var totalCityHall = 0
 
         for (zone in tariffZones) {
-            totalSmall += zone.nbSmallTables
-            totalLarge += zone.nbLargeTables
-            totalCityHall += zone.nbCityHallTables
+            totalSmall += zone.nbSmallTables ?: 0
+            totalLarge += zone.nbLargeTables ?: 0
+            totalCityHall += zone.nbCityHallTables ?: 0
         }
 
         return Festival(
@@ -61,9 +61,9 @@ class FestivalViewModel : ViewModel() {
         var allocatedCityHall = 0
 
         festival.tariffZones.forEach { zone ->
-            allocatedSmall += zone.nbSmallTables
-            allocatedLarge += zone.nbLargeTables
-            allocatedCityHall += zone.nbCityHallTables
+            allocatedSmall += zone.nbSmallTables ?: 0
+            allocatedLarge += zone.nbLargeTables ?: 0
+            allocatedCityHall += zone.nbCityHallTables ?: 0
         }
 
         return mapOf(
