@@ -26,7 +26,7 @@ class FestivalViewModel(
 
     // ========== LOAD DATA FROM REPOSITORY ==========
 
-    private fun loadAllFestivals() {
+    fun loadAllFestivals() {
         festivalRepository.getAllFestivals()
             .onEach { festivals ->
                 _uiState.update { it.copy(festivals = festivals) }
