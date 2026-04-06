@@ -145,8 +145,6 @@ fun FestivalFormDialog(
                         beginDate.ifBlank { null }, 
                         endDate.ifBlank { null }
                     )
-                    println("✅ Festival préparé: $prepared")
-                    println("✅ onSave appelé avec: $prepared")
                     onSave(prepared)
                 },
                 enabled = festivalName.isNotBlank() && zones.isNotEmpty()

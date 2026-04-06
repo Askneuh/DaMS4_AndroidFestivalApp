@@ -181,17 +181,13 @@ private suspend fun createFestival(
     apiService: APIService
 ) {
     viewModel.setLoading(true)
-    println("🔄 Création festival: ${festival.name}")
     try {
         val newFestival = apiService.createFestival(festival)
-        println("✅ Festival créé: ${newFestival.name}")
         viewModel.setSuccessMessage("Festival créé avec succès!")
         viewModel.closeForm()
         viewModel.setLoading(false)
         loadFestivals(viewModel, apiService, kotlinx.coroutines.GlobalScope)
     } catch (e: Exception) {
-        println("❌ Erreur: ${e.message}")
-        println("❌ Stack trace: ${e.stackTraceToString()}")
         viewModel.setError(e.message ?: "Erreur lors de la création")
         viewModel.setLoading(false)
     }
@@ -204,21 +200,13 @@ private suspend fun updateFestival(
     apiService: APIService
 ) {
     viewModel.setLoading(true)
-    println("🔄 Modification festival: ${festival.name} (original: $originalName)")
-    println("📦 Zones envoyées: ${festival.tariffZones}")
-    println("📊 Nombres de zones: ${festival.tariffZones.size}")
     try {
         val updatedFestival = apiService.updateFestivalByName(originalName, festival)
-        println("✅ Festival modifié: ${updatedFestival.name}")
-        println("📦 Zones reçues: ${updatedFestival.tariffZones}")
-        println("📊 Nombres de zones reçues: ${updatedFestival.tariffZones.size}")
         viewModel.setSuccessMessage("Festival mis à jour avec succès!")
         viewModel.closeForm()
         viewModel.setLoading(false)
         loadFestivals(viewModel, apiService, kotlinx.coroutines.GlobalScope)
     } catch (e: Exception) {
-        println("❌ Erreur modification: ${e.message}")
-        println("❌ Stack trace: ${e.stackTraceToString()}")
         viewModel.setError(e.message ?: "Erreur lors de la modification")
         viewModel.setLoading(false)
     }
