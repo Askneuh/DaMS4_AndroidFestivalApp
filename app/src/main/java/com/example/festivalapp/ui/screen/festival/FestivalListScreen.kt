@@ -2,11 +2,8 @@ package com.example.festivalapp.ui.screen.festival
 
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.grid.GridCells
-import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
-import androidx.compose.foundation.lazy.grid.items
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Delete
@@ -23,7 +20,6 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.festivalapp.data.festival.Festival
 import com.example.festivalapp.data.APIService
 import kotlinx.coroutines.launch
-import androidx.compose.foundation.lazy.LazyColumn
 
 @Composable
 fun FestivalListScreen(
