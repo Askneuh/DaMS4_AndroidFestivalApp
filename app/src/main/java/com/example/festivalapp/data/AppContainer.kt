@@ -9,6 +9,7 @@ import com.example.festivalapp.data.session.SessionRepository
 import com.example.festivalapp.data.session.sessionDataStore
 import com.example.festivalapp.data.user.room.DefaultUserRepository
 import com.example.festivalapp.data.user.room.UserRepository
+import com.example.festivalapp.data.editor.EditorRepository
 
 interface AppContainer {
     val sessionRepository: SessionRepository
@@ -18,6 +19,7 @@ interface AppContainer {
     val userRepository: UserRepository
     val reservationRepository: ReservationRepository
     val userPreferences: UserPreferencesDs
+    val editorRepository: EditorRepository
 }
 
 class AppDataContainer(private val context: Context) : AppContainer {
@@ -42,6 +44,15 @@ class AppDataContainer(private val context: Context) : AppContainer {
             reservationDAO = FestivalDatabase.getDatabase(context).reservationDAO(),
             editorDAO = FestivalDatabase.getDatabase(context).editorDAO(),
             api = RetrofitInstance.reservationApi
+        )
+    }
+
+    override val editorRepository: EditorRepository by lazy {
+        EditorRepository(
+            editorDAO = FestivalDatabase.getDatabase(context).editorDAO(),
+            gameDAO = FestivalDatabase.getDatabase(context).gameDAO(),
+            contactDAO = FestivalDatabase.getDatabase(context).contactDAO(),
+            api = RetrofitInstance.editorApi
         )
     }
 
