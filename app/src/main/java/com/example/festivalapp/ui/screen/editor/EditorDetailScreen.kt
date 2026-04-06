@@ -30,6 +30,8 @@ fun EditorDetailScreen(
     val contacts by viewModel.contacts.collectAsState()
     val networkState by viewModel.networkState.collectAsState()
     val snackbarHostState = remember { SnackbarHostState() }
+    var selectedTabIndex by remember { mutableIntStateOf(0) }
+    val tabTitles = listOf("Jeux", "Contacts")
 
     LaunchedEffect(networkState) {
         if (networkState is EditorDetailUiState.Error) {
@@ -58,55 +60,75 @@ fun EditorDetailScreen(
             )
         }
     ) { padding ->
-        LazyColumn(
-            modifier = Modifier
-                .padding(padding)
-                .fillMaxSize(),
-            contentPadding = PaddingValues(16.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp)
-        ) {
+        Column(modifier = Modifier.padding(padding).fillMaxSize()) {
+            // --- TabRow ---
+            TabRow(selectedTabIndex = selectedTabIndex) {
+                tabTitles.forEachIndexed { index, title ->
+                    Tab(
+                        selected = selectedTabIndex == index,
+                        onClick = { selectedTabIndex = index },
+                        text = { Text(title) }
+                    )
+                }
+            }
+
+            // --- Loading Indicator ---
             if (networkState is EditorDetailUiState.Loading) {
-                item {
-                    LinearProgressIndicator(modifier = Modifier.fillMaxWidth())
-                }
+                LinearProgressIndicator(modifier = Modifier.fillMaxWidth())
             }
 
-            // --- Section Jeux ---
+            // --- Tab Content ---
+            when (selectedTabIndex) {
+                0 -> GamesTabContent(games = games, isLoading = networkState is EditorDetailUiState.Loading)
+                1 -> ContactsTabContent(contacts = contacts, isLoading = networkState is EditorDetailUiState.Loading)
+            }
+        }
+    }
+}
+
+@Composable
+fun GamesTabContent(games: List<Game>, isLoading: Boolean) {
+    LazyColumn(
+        modifier = Modifier.fillMaxSize(),
+        contentPadding = PaddingValues(16.dp),
+        verticalArrangement = Arrangement.spacedBy(8.dp)
+    ) {
+        if (games.isEmpty() && !isLoading) {
             item {
-                Text(
-                    text = "Jeux",
-                    style = MaterialTheme.typography.headlineSmall,
-                    fontWeight = FontWeight.Bold
-                )
-            }
-
-            if (games.isEmpty() && networkState !is EditorDetailUiState.Loading) {
-                item {
-                    Text("Aucun jeu enregistré pour cet éditeur.", style = MaterialTheme.typography.bodyMedium)
-                }
-            } else {
-                items(games, key = { it.id }) { game ->
-                    GameCard(game = game)
+                Box(
+                    modifier = Modifier.fillMaxWidth().padding(vertical = 32.dp),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text("Aucun jeu enregistré pour cet éditeur.", color = MaterialTheme.colorScheme.onSurfaceVariant)
                 }
             }
+        } else {
+            items(games, key = { it.id }) { game ->
+                GameCard(game = game)
+            }
+        }
+    }
+}
 
-            // --- Section Contacts ---
+@Composable
+fun ContactsTabContent(contacts: List<Contact>, isLoading: Boolean) {
+    LazyColumn(
+        modifier = Modifier.fillMaxSize(),
+        contentPadding = PaddingValues(16.dp),
+        verticalArrangement = Arrangement.spacedBy(8.dp)
+    ) {
+        if (contacts.isEmpty() && !isLoading) {
             item {
-                Text(
-                    text = "Contacts",
-                    style = MaterialTheme.typography.headlineSmall,
-                    fontWeight = FontWeight.Bold
-                )
+                Box(
+                    modifier = Modifier.fillMaxWidth().padding(vertical = 32.dp),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text("Aucun contact enregistré pour cet éditeur.", color = MaterialTheme.colorScheme.onSurfaceVariant)
+                }
             }
-
-            if (contacts.isEmpty() && networkState !is EditorDetailUiState.Loading) {
-                item {
-                    Text("Aucun contact enregistré pour cet éditeur.", style = MaterialTheme.typography.bodyMedium)
-                }
-            } else {
-                items(contacts, key = { it.id }) { contact ->
-                    ContactCard(contact = contact)
-                }
+        } else {
+            items(contacts, key = { it.id }) { contact ->
+                ContactCard(contact = contact)
             }
         }
     }
