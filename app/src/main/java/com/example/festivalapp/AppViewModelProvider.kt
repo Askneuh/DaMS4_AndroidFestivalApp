@@ -8,12 +8,13 @@ import com.example.festivalapp.ui.screen.admin.users.AdminUserListViewModel
 import com.example.festivalapp.ui.screen.login.LoginViewModel
 import com.example.festivalapp.ui.screen.reservation.ReservationListViewModel
 import com.example.festivalapp.ui.screen.festival.FestivalViewModel
+import com.example.festivalapp.ui.screen.editor.EditorListViewModel
 
 object AppViewModelProvider {
     val Factory = viewModelFactory {
 
         initializer {
-            LoginViewModel(repository = festivalApplication().container.authRepository,)
+            LoginViewModel(repository = festivalApplication().container.authRepository)
         }
 
         initializer {
@@ -26,6 +27,10 @@ object AppViewModelProvider {
 
         initializer {
             FestivalViewModel(festivalRepository = festivalApplication().container.festivalRepository)
+        }
+
+        initializer {
+            EditorListViewModel(editorRepository = festivalApplication().container.editorRepository)
         }
     }
 }

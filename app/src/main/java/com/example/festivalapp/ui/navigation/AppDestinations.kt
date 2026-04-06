@@ -9,14 +9,12 @@ sealed class AppDestinations(val isPublic: Boolean = false) {
     data object FestivalList : AppDestinations()
     data class FestivalCreate(val festivalId: String? = null) : AppDestinations()
 
-    // Publisher Management
-    data object PublisherList : AppDestinations()
-    data class PublisherDetail(val publisherId: Int? = null) : AppDestinations()
+    // Editor Management (Replaces Publisher)
+    data object EditorList : AppDestinations()
+    data class EditorDetail(val editorId: Int? = null) : AppDestinations()
 
     // Reservation & Workflow (Current Festival)
     data object ReservationOverview : AppDestinations(isPublic = true)
-    data class ReservationDetail(val publisherId: Int) : AppDestinations()
+    data class ReservationDetail(val editorId: Int) : AppDestinations()
     data object FestivalGamesList : AppDestinations(isPublic = true)
 }
-
-

@@ -9,7 +9,7 @@ import androidx.compose.ui.unit.dp
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ReservationDetailScreen(
-    publisherId: Int,
+    editorId: Int,
     onNavigateBack: () -> Unit
 ) {
     Scaffold(
@@ -25,7 +25,7 @@ fun ReservationDetailScreen(
         }
     ) { padding ->
         Column(modifier = Modifier.padding(padding).fillMaxSize()) {
-            Text("Workflow de réservation pour l'id: $publisherId", modifier = Modifier.padding(16.dp))
+            Text("Workflow de réservation pour l'id: $editorId", modifier = Modifier.padding(16.dp))
             // TODO: Contact dates, workflow status (Pas encore contacté, Discussion en cours...), games allocation, billing info...
         }
     }
