@@ -25,7 +25,7 @@ class MainActivity : ComponentActivity() {
                 var isLoggedIn by remember { mutableStateOf(false) }
 
                 if (isLoggedIn) {
-                    AppNavigation(navController, container.apiService)
+                    AppNavigation(navController, container.festivalRepository)
                 } else {
                     LoginRoute(
                         authRepository = container.authRepository,

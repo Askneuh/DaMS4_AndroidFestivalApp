@@ -16,21 +16,16 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.festivalapp.data.festival.Festival
-import com.example.festivalapp.data.APIService
-import kotlinx.coroutines.launch
 
 @Composable
 fun FestivalListScreen(
-    apiService: APIService,
-    viewModel: FestivalViewModel = viewModel()
+    viewModel: FestivalViewModel
 ) {
     val uiState by viewModel.uiState.collectAsState()
-    val scope = rememberCoroutineScope()
     
     LaunchedEffect(Unit) {
-        loadFestivals(viewModel, apiService, scope)
+        viewModel.loadCurrentFestival()
     }
     
     Scaffold(
@@ -47,7 +42,6 @@ fun FestivalListScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(paddingValues)
-                
         ) {
             Text(
                 text = "Liste des Festivals",
@@ -55,6 +49,7 @@ fun FestivalListScreen(
                 fontWeight = FontWeight.Bold,
                 modifier = Modifier.padding(16.dp)
             )
+            
             if (uiState.successMessage != null) {
                 Card(
                     modifier = Modifier
@@ -70,6 +65,7 @@ fun FestivalListScreen(
                     )
                 }
             }
+            
             if (uiState.error != null) {
                 Card(
                     modifier = Modifier
@@ -85,6 +81,7 @@ fun FestivalListScreen(
                     )
                 }
             }
+            
             if (uiState.isLoading && uiState.festivals.isEmpty()) {
                 CircularProgressIndicator(
                     modifier = Modifier
@@ -111,16 +108,8 @@ fun FestivalListScreen(
                             festival = festival,
                             isCurrent = festival.name == uiState.currentFestival?.name,
                             onEdit = { viewModel.openForm(festival) },
-                            onDelete = { 
-                                scope.launch { 
-                                    deleteFestival(festival.name, viewModel, apiService)
-                                }
-                            },
-                            onMakeCurrent = { 
-                                scope.launch { 
-                                    setCurrentFestival(festival.name, viewModel, apiService)
-                                }
-                            }
+                            onDelete = { viewModel.deleteFestival(festival.name) },
+                            onMakeCurrent = { viewModel.setCurrentFestival(festival.name) }
                         )
                     }
                 }
@@ -134,12 +123,10 @@ fun FestivalListScreen(
             isEditMode = uiState.isEditMode,
             onDismiss = { viewModel.closeForm() },
             onSave = { festival ->
-                scope.launch {
-                    if (uiState.isEditMode && uiState.selectedFestival != null) {
-                        updateFestival(uiState.selectedFestival!!.name, festival, viewModel, apiService)
-                    } else {
-                        createFestival(festival, viewModel, apiService)
-                    }
+                if (uiState.isEditMode && uiState.selectedFestival != null) {
+                    viewModel.updateFestival(uiState.selectedFestival!!.name, festival)
+                } else {
+                    viewModel.createFestival(festival)
                 }
             },
             onCalculateRemaining = { viewModel.calculateRemainingTables(it) },
@@ -147,103 +134,6 @@ fun FestivalListScreen(
                 viewModel.prepareFestivalForSave(name, zones, begin, end)
             }
         )
-    }
-}
-
-// ========== API CALLS IN COMPOSABLE ==========
-
-private suspend fun loadFestivals(
-    viewModel: FestivalViewModel,
-    apiService: APIService,
-    scope: kotlinx.coroutines.CoroutineScope
-) {
-    viewModel.setLoading(true)
-    try {
-        val festivals = apiService.getAllFestivals()
-        viewModel.setFestivals(festivals)
-        
-        try {
-            val current = apiService.getCurrentFestival()
-            viewModel.setCurrentFestival(current)
-        } catch (e: Exception) {
-            viewModel.setCurrentFestival(null)
-        }
-        viewModel.setLoading(false)
-    } catch (e: Exception) {
-        viewModel.setError(e.message ?: "Erreur lors du chargement")
-        viewModel.setLoading(false)
-    }
-}
-
-private suspend fun createFestival(
-    festival: Festival,
-    viewModel: FestivalViewModel,
-    apiService: APIService
-) {
-    viewModel.setLoading(true)
-    try {
-        val newFestival = apiService.createFestival(festival)
-        viewModel.setSuccessMessage("Festival créé avec succès!")
-        viewModel.closeForm()
-        viewModel.setLoading(false)
-        loadFestivals(viewModel, apiService, kotlinx.coroutines.GlobalScope)
-    } catch (e: Exception) {
-        viewModel.setError(e.message ?: "Erreur lors de la création")
-        viewModel.setLoading(false)
-    }
-}
-
-private suspend fun updateFestival(
-    originalName: String,
-    festival: Festival,
-    viewModel: FestivalViewModel,
-    apiService: APIService
-) {
-    viewModel.setLoading(true)
-    try {
-        val updatedFestival = apiService.updateFestivalByName(originalName, festival)
-        viewModel.setSuccessMessage("Festival mis à jour avec succès!")
-        viewModel.closeForm()
-        viewModel.setLoading(false)
-        loadFestivals(viewModel, apiService, kotlinx.coroutines.GlobalScope)
-    } catch (e: Exception) {
-        viewModel.setError(e.message ?: "Erreur lors de la modification")
-        viewModel.setLoading(false)
-    }
-}
-
-private suspend fun deleteFestival(
-    name: String,
-    viewModel: FestivalViewModel,
-    apiService: APIService
-) {
-    viewModel.setLoading(true)
-    try {
-        apiService.deleteFestival(name)
-        viewModel.setSuccessMessage("Festival supprimé avec succès!")
-        viewModel.setLoading(false)
-        loadFestivals(viewModel, apiService, kotlinx.coroutines.GlobalScope)
-    } catch (e: Exception) {
-        viewModel.setError(e.message ?: "Erreur lors de la suppression")
-        viewModel.setLoading(false)
-    }
-}
-
-private suspend fun setCurrentFestival(
-    name: String,
-    viewModel: FestivalViewModel,
-    apiService: APIService
-) {
-    viewModel.setLoading(true)
-    try {
-        val festival = apiService.setCurrentFestival(name)
-        viewModel.setSuccessMessage("Le festival \"$name\" est désormais le festival courant!")
-        viewModel.setCurrentFestival(festival)
-        viewModel.setLoading(false)
-        loadFestivals(viewModel, apiService, kotlinx.coroutines.GlobalScope)
-    } catch (e: Exception) {
-        viewModel.setError(e.message ?: "Erreur")
-        viewModel.setLoading(false)
     }
 }
 
