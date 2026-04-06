@@ -14,7 +14,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.example.festivalapp.data.festival.Festival
 import com.example.festivalapp.data.festival.TariffZone
-
+//Version final de festival-zonetarifaire
 @Composable
 fun FestivalFormDialog(
     festival: Festival?,
