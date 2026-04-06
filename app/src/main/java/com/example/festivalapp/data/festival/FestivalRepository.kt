@@ -202,4 +202,24 @@ class FestivalRepository(
             squareMeterPrice = squareMeterPrice
         )
     }
+    // ========== SYNC FROM API ==========
+    suspend fun syncAllFestivalsFromApi(): List<Festival> {
+        return try {
+        // Récupère les festivals de l'API
+        val festivalsFromApi = apiService.getAllFestivals()
+        
+        // Sauvegarde chaque festival localement
+        festivalsFromApi.forEach { festival ->
+            festivalDao.insertFestival(festival.toEntity())
+            festival.tariffZones.forEach { zone ->
+                tariffZoneDao.insertZone(zone.toEntity())
+            }
+        }
+        
+        festivalsFromApi
+    } catch (e: Exception) {
+        // Si erreur API, retourne ce qui est en local
+        getAllFestivals().firstOrNull() ?: emptyList()
+    }
+}
 }

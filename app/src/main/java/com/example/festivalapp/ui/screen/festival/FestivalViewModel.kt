@@ -22,6 +22,7 @@ class FestivalViewModel(
 
     init {
         loadAllFestivals()
+        syncFestivalsFromApi()
     }
 
     // ========== LOAD DATA FROM REPOSITORY ==========
