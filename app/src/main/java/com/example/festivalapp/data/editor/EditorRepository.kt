@@ -37,12 +37,24 @@ class EditorRepository(
     }
 
     suspend fun refreshGamesForEditor(editorId: Int) {
-        val dtoList = api.getGamesByEditor(editorId)
-        gameDAO.insertAll(dtoList.map { it.toRoom() })
+        try {
+            val dtoList = api.getGamesByEditor(editorId)
+            gameDAO.insertAll(dtoList.map { it.toRoom() })
+        } catch (e: Exception) {
+            // Si c'est une 404, on ignore (pas de jeux), sinon on remonte l'erreur
+            if (e is retrofit2.HttpException && e.code() == 404) return
+            throw e
+        }
     }
 
     suspend fun refreshContactsForEditor(editorId: Int) {
-        val dtoList = api.getContactsByEditor(editorId)
-        contactDAO.insertAll(dtoList.map { it.toRoom() })
+        try {
+            val dtoList = api.getContactsByEditor(editorId)
+            contactDAO.insertAll(dtoList.map { it.toRoom() })
+        } catch (e: Exception) {
+            // Idem pour les contacts
+            if (e is retrofit2.HttpException && e.code() == 404) return
+            throw e
+        }
     }
 }
