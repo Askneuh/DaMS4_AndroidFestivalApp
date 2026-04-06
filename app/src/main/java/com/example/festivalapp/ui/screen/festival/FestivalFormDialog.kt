@@ -90,7 +90,7 @@ fun FestivalFormDialog(
                 Button(
                     onClick = {
                         zones = zones.toMutableList().apply {
-                            add(TariffZone(idTZ = size + 1, festivalName = festivalName))
+                            add(TariffZone(idTZ = 0, festivalName = festivalName))
                         }
                     },
                     modifier = Modifier
