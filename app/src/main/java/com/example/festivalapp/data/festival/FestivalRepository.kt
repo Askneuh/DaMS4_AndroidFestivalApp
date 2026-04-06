@@ -3,6 +3,7 @@ package com.example.festivalapp.data.festival
 import com.example.festivalapp.data.APIService
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.catch
+import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.map
 
 class FestivalRepository(
@@ -13,13 +14,9 @@ class FestivalRepository(
     // ========== READ OPERATIONS (Local First) ==========
     
     fun getAllFestivals(): Flow<List<Festival>> {
-        return festivalDao.getAllFestivals()
+        return festivalDao.getAllFestivalsWithZones()
             .map { entities ->
-                entities.map { entity ->
-                    entity.toFestival(
-                        tariffZoneDao.getZonesByFestival(entity.name).map { it.toTariffZone() }
-                    )
-                }
+                entities.map { it.toFestival() }
             }
             .catch { 
                 emit(emptyList())
@@ -27,28 +24,16 @@ class FestivalRepository(
     }
 
     fun getFestivalByName(name: String): Flow<Festival?> {
-        return festivalDao.getFestivalByName(name)
-            .map { entity ->
-                entity?.let {
-                    it.toFestival(
-                        tariffZoneDao.getZonesByFestival(it.name).map { zone -> zone.toTariffZone() }
-                    )
-                }
-            }
+        return festivalDao.getFestivalWithZonesByName(name)
+            .map { it?.toFestival() }
             .catch { 
                 emit(null)
             }
     }
 
     fun getCurrentFestival(): Flow<Festival?> {
-        return festivalDao.getCurrentFestival()
-            .map { entity ->
-                entity?.let {
-                    it.toFestival(
-                        tariffZoneDao.getZonesByFestival(it.name).map { zone -> zone.toTariffZone() }
-                    )
-                }
-            }
+        return festivalDao.getCurrentFestivalWithZones()
+            .map { it?.toFestival() }
             .catch { 
                 emit(null)
             }
@@ -138,13 +123,7 @@ class FestivalRepository(
     suspend fun setCurrentFestival(name: String): Result<Festival> {
         return try {
             // 1️⃣ Chercher le festival en local
-            val festival = festivalDao.getFestivalByName(name).map { entity ->
-                entity?.let {
-                    it.toFestival(
-                        tariffZoneDao.getZonesByFestival(it.name).map { zone -> zone.toTariffZone() }
-                    )
-                }
-            }
+            val localFestival = festivalDao.getFestivalWithZonesByName(name).firstOrNull()?.toFestival()
             
             // 2️⃣ En background: envoyer à l'API
             try {
@@ -154,7 +133,7 @@ class FestivalRepository(
                 Result.success(apiResult)
             } catch (apiError: Exception) {
                 // Garder données locales
-                Result.success(festival.value ?: Festival())
+                Result.success(localFestival ?: Festival())
             }
         } catch (e: Exception) {
             Result.failure(e)
@@ -188,6 +167,10 @@ class FestivalRepository(
             beginDate = beginDate,
             endDate = endDate
         )
+    }
+
+    private fun FestivalWithZones.toFestival(): Festival {
+        return festival.toFestival(zones.map { it.toTariffZone() })
     }
 
     private fun TariffZone.toEntity(): TariffZoneEntity {
