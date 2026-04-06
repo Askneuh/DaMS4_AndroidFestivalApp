@@ -4,7 +4,8 @@ import android.content.Context
 import com.example.festivalapp.data.auth.AuthRepository
 import com.example.festivalapp.data.datastore.UserPreferencesDs
 import com.example.festivalapp.data.festival.FestivalRepository
-import com.example.festivalapp.data.reservation.room.ReservationRepository
+import com.example.festivalapp.data.game.room.GameRepository
+import com.example.festivalapp.data.reservation.ReservationRepository
 import com.example.festivalapp.data.session.SessionRepository
 import com.example.festivalapp.data.session.sessionDataStore
 import com.example.festivalapp.data.user.room.DefaultUserRepository
@@ -20,6 +21,7 @@ interface AppContainer {
     val reservationRepository: ReservationRepository
     val userPreferences: UserPreferencesDs
     val editorRepository: EditorRepository
+    val gameRepository: GameRepository
 }
 
 class AppDataContainer(private val context: Context) : AppContainer {
@@ -29,7 +31,7 @@ class AppDataContainer(private val context: Context) : AppContainer {
     }
 
     override val authRepository: AuthRepository by lazy {
-        AuthRepository(RetrofitInstance.api, sessionRepository)
+        AuthRepository(RetrofitInstance.authApi, sessionRepository)
     }
 
     override val userRepository: UserRepository by lazy {
@@ -39,11 +41,22 @@ class AppDataContainer(private val context: Context) : AppContainer {
         )
     }
 
+    override val gameRepository: GameRepository by lazy {
+        GameRepository(
+            api = RetrofitInstance.gameApi,
+            gameDAO = FestivalDatabase.getDatabase(context).gameDAO()
+        )
+    }
+
     override val reservationRepository: ReservationRepository by lazy {
         ReservationRepository(
             reservationDAO = FestivalDatabase.getDatabase(context).reservationDAO(),
             editorDAO = FestivalDatabase.getDatabase(context).editorDAO(),
-            api = RetrofitInstance.reservationApi
+            suiviDAO = FestivalDatabase.getDatabase(context).suiviReservationDAO(),
+            gameDAO = FestivalDatabase.getDatabase(context).gameDAO(),
+            reservationGameDAO = FestivalDatabase.getDatabase(context).reservationGameDAO(),
+            reservationApi = RetrofitInstance.reservationApi,
+            suiviApi = RetrofitInstance.suiviApi
         )
     }
 

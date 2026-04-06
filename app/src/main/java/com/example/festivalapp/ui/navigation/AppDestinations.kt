@@ -15,6 +15,6 @@ sealed class AppDestinations(val isPublic: Boolean = false) {
 
     // Reservation & Workflow (Current Festival)
     data object ReservationOverview : AppDestinations(isPublic = true)
-    data class ReservationDetail(val editorId: Int) : AppDestinations()
+    data class ReservationDetail(val reservationId: Int) : AppDestinations()
     data object FestivalGamesList : AppDestinations(isPublic = true)
 }

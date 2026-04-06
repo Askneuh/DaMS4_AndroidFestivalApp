@@ -28,7 +28,11 @@ data class EditorWithReservationDto(
                 nbCityHallTables = reservation.nbCityHallTables,
                 m2 = reservation.m2,
                 remise = reservation.remise,
-                idTZ = null // Adapté si tu ne le reçois pas dans ce DTO
+                idTZ = null,
+                typeAnimateur = 0,
+                listeDemandee = false,
+                listeRecue = false,
+                jeuxRecus = false
             )
         } else null
 
@@ -36,7 +40,6 @@ data class EditorWithReservationDto(
     }
 }
 
-// Sous-bloc correspondant exactement à l'API "withReservationStatus"
 @Serializable
 data class ReservationInnerDto(
     val idReservation: Int,

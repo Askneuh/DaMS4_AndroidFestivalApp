@@ -3,9 +3,6 @@ package com.example.festivalapp.data.example
 import androidx.room.Entity
 import androidx.room.PrimaryKey
 
-/**
- * Entity data class represents a single row in the database.
- */
 @Entity(tableName = "items")
 data class Item(
     @PrimaryKey(autoGenerate = true)

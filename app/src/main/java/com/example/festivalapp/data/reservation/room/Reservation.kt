@@ -12,7 +12,11 @@ data class Reservation(
     val nbSmallTables: Int,
     val nbLargeTables: Int,
     val nbCityHallTables: Int,
+    val typeAnimateur: Int,
+    val listeDemandee: Boolean,
+    val listeRecue: Boolean,
+    val jeuxRecus: Boolean,
     val m2: Int,
     val remise: Double,
-    val idTZ: Int? // Peut être nul
+    val idTZ: Int?
 )

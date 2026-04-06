@@ -174,7 +174,7 @@ fun AppNavigation(
                 }
                 is AppDestinations.ReservationDetail -> NavEntry(key) {
                     ReservationDetailScreen(
-                        editorId = key.editorId,
+                        reservationId = key.reservationId,
                         onNavigateBack = { controller.navigateBack() }
                     )
                 }

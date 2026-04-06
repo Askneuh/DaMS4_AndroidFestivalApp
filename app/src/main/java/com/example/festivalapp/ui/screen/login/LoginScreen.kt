@@ -33,7 +33,6 @@ fun LoginScreen(
 ) {
     val loginState by viewModel.loginState.collectAsState()
 
-    // Naviguer vers la page suivante si le login réussit
     LaunchedEffect(loginState) {
         if (loginState is LoginResult.Success) {
             onLoginSuccess()
@@ -69,7 +68,6 @@ fun LoginScreenContent(
             verticalArrangement = Arrangement.spacedBy(16.dp),
             modifier = Modifier.fillMaxWidth()
         ) {
-            // Titre
             Text(
                 text = "Connexion",
                 style = MaterialTheme.typography.headlineMedium
@@ -77,7 +75,6 @@ fun LoginScreenContent(
 
             Spacer(modifier = Modifier.height(8.dp))
 
-            // Champ nom d'utilisateur
             OutlinedTextField(
                 value = username,
                 onValueChange = { username = it },
@@ -94,7 +91,6 @@ fun LoginScreenContent(
                 isError = loginState is LoginResult.Error
             )
 
-            // Champ mot de passe
             OutlinedTextField(
                 value = password,
                 onValueChange = { password = it },
@@ -126,7 +122,6 @@ fun LoginScreenContent(
                 isError = loginState is LoginResult.Error
             )
 
-            // Message d'erreur
             if (loginState is LoginResult.Error) {
                 Text(
                     text = loginState.message,
@@ -137,7 +132,6 @@ fun LoginScreenContent(
 
             Spacer(modifier = Modifier.height(8.dp))
 
-            // Bouton de connexion
             Button(
                 onClick = { onLogin(username, password) },
                 enabled = username.isNotBlank() && password.isNotBlank() && loginState !is LoginResult.Loading,

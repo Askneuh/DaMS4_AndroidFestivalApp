@@ -15,10 +15,6 @@ class DataStoreCookieJar(private val sessionRepository: SessionRepository) : Coo
         val refreshValue = runBlocking {
             sessionRepository.refreshCookieFlow.first()
         }
-        println("===== TEST COOKIE JAR =====")
-        println("Requête vers : $url")
-        println("Access Token en stock : ${if (accessValue != null) "OUI, IL EST LÀ" else "VIDE !! DANGER !"}")
-        println("===========================")
 
         val cookies = mutableListOf<Cookie>()
 
@@ -35,7 +31,7 @@ class DataStoreCookieJar(private val sessionRepository: SessionRepository) : Coo
             )
         }
 
-        if (refreshValue != null) {
+        if (refreshValue != null && url.encodedPath.contains("/auth/refresh")) {
             cookies.add(
                 Cookie.Builder()
                     .name("refresh_token")

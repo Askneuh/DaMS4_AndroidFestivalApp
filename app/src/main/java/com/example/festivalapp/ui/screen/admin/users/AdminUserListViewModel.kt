@@ -1,4 +1,4 @@
-package com.example.festivalapp.ui.screen.admin.users // Adapte le chemin si tu le mets ailleurs
+package com.example.festivalapp.ui.screen.admin.users
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -36,7 +36,7 @@ class AdminUserListViewModel(private val userRepository: UserRepository) : ViewM
         viewModelScope.launch {
             _networkState.value = UserListUiState.Loading
             try {
-                userRepository.refreshUsers() // -> Appelle internet
+                userRepository.refreshUsers()
                 _networkState.value = UserListUiState.Success
             } catch (e: Exception) {
                 _networkState.value = UserListUiState.Error("Erreur réseau: ${e.message}")
