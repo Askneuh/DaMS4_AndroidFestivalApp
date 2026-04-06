@@ -23,6 +23,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.festivalapp.data.festival.Festival
 import com.example.festivalapp.data.APIService
 import kotlinx.coroutines.launch
+import androidx.compose.foundation.lazy.LazyColumn
 
 @Composable
 fun FestivalListScreen(
@@ -102,14 +103,12 @@ fun FestivalListScreen(
                         .padding(32.dp)
                 )
             } else {
-                LazyVerticalGrid(
-                    columns = GridCells.Fixed(2),
+                LazyColumn(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(horizontal = 8.dp),
-                    contentPadding = PaddingValues(8.dp),
-                    horizontalArrangement = Arrangement.spacedBy(8.dp),
-                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                        .padding(horizontal = 16.dp),
+                    verticalArrangement = Arrangement.spacedBy(12.dp),
+                    contentPadding = PaddingValues(8.dp)
                 ) {
                     items(uiState.festivals) { festival ->
                         FestivalCard(
