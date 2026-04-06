@@ -42,6 +42,17 @@ class FestivalViewModel(
             }
             .launchIn(viewModelScope)
     }
+    // ========== SYNC FROM API ==========
+fun syncFestivalsFromApi() {
+    viewModelScope.launch {
+        try {
+            val festivalsFromApi = festivalRepository.syncAllFestivalsFromApi()
+            _uiState.update { it.copy(festivals = festivalsFromApi) }
+        } catch (e: Exception) {
+            setError("Erreur lors de la synchronisation: ${e.message}")
+        }
+    }
+}
 
     // ========== CREATE FESTIVAL ==========
 
