@@ -199,7 +199,7 @@ fun TariffZoneFormField(
             )
             Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 OutlinedTextField(
-                    value = zone.nbSmallTables.toString(),
+                    value = (zone.nbSmallTables ?: 0).toString(),
                     onValueChange = {
                         val value = it.toIntOrNull() ?: 0
                         onZoneChange(zone.copy(nbSmallTables = value, remainingSmallTables = value))
@@ -208,7 +208,7 @@ fun TariffZoneFormField(
                     modifier = Modifier.weight(1f)
                 )
                 OutlinedTextField(
-                    value = zone.nbLargeTables.toString(),
+                    value = (zone.nbLargeTables ?: 0).toString(),
                     onValueChange = {
                         val value = it.toIntOrNull() ?: 0
                         onZoneChange(zone.copy(nbLargeTables = value, remainingLargeTables = value))
@@ -217,7 +217,7 @@ fun TariffZoneFormField(
                     modifier = Modifier.weight(1f)
                 )
                 OutlinedTextField(
-                    value = zone.nbCityHallTables.toString(),
+                    value = (zone.nbCityHallTables ?: 0).toString(),
                     onValueChange = {
                         val value = it.toIntOrNull() ?: 0
                         onZoneChange(zone.copy(nbCityHallTables = value, remainingCityHallTables = value))
