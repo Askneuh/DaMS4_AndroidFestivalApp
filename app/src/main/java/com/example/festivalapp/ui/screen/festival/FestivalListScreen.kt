@@ -26,6 +26,7 @@ fun FestivalListScreen(
     
     LaunchedEffect(Unit) {
         viewModel.loadCurrentFestival()
+         viewModel.loadAllFestivals()
     }
     
     Scaffold(
