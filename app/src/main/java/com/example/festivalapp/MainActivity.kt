@@ -97,7 +97,7 @@ class MainActivity : ComponentActivity() {
                         ReservationDetailRoute(
                             reservationId = selectedReservationId!!,
                             reservationRepository = app.container.reservationRepository,
-                            onBack = { selectedReservationId = null } // Bouton retour = on vide l'ID
+                            onBack = { selectedReservationId = null }
                         )
                     }
 

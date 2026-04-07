@@ -156,17 +156,21 @@ fun UserCard(
             title = { Text("Modifier le rôle de ${user.login}") },
             text = {
                 Column {
-                    // On propose les 4 rôles possibles
-                    val roles = listOf("Administrateur", "Organisateur", "Editeur", "Visiteur")
-                    roles.forEach { role ->
+                    val roles = listOf(
+                        "Administrateur" to "admin",
+                        "Organisateur"   to "organisateur",
+                        "Éditeur"        to "editeur_jeu",
+                        "Visiteur"       to "visiteur"
+                    )
+                    roles.forEach { (label, value) ->
                         TextButton(
                             onClick = {
-                                onUpdateRoleClick(role)
+                                onUpdateRoleClick(value)
                                 showEditDialog = false
                             },
                             modifier = Modifier.fillMaxWidth()
                         ) {
-                            Text(role)
+                            Text(label)
                         }
                     }
                 }
