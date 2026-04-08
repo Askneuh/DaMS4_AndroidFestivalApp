@@ -1,9 +1,5 @@
-package com.example.festivalapp.data.user
+package com.example.festivalapp.data.user.retrofit
 
-import com.example.festivalapp.data.user.retrofit.CreateUserRequest
-import com.example.festivalapp.data.user.retrofit.UpdateRoleRequest
-import com.example.festivalapp.data.user.retrofit.UserActionResponse
-import com.example.festivalapp.data.user.room.UserDto
 import retrofit2.Response
 import retrofit2.http.*
 
