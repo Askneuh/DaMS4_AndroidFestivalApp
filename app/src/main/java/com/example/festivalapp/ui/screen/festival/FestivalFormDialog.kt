@@ -3,6 +3,7 @@ package com.example.festivalapp.ui.screen.festival
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
@@ -322,9 +323,13 @@ fun PlanZoneFormField(
             
             Text("Zone tarifaire liée :", style = MaterialTheme.typography.bodySmall)
             
-            // Simple approach: list of buttons or a pseudo-dropdown
-            // For brevity, let's use a selection of chips
-            Row(modifier = Modifier.fillMaxWidth().verticalScroll(rememberScrollState())) {
+            // On utilise une Row avec un scroll horizontal simple, ou pas de scroll si peu d'éléments
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .horizontalScroll(rememberScrollState())
+                    .padding(vertical = 4.dp)
+            ) {
                 availableTariffZones.forEach { tZone ->
                     val isSelected = planZone.tariffZoneId == tZone.idTZ
                     FilterChip(
