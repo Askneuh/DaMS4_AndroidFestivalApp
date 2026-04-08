@@ -7,6 +7,7 @@ import com.example.festivalapp.data.user.room.UserRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
@@ -19,7 +20,7 @@ sealed interface UserListUiState {
 class AdminUserListViewModel(private val userRepository: UserRepository) : ViewModel() {
 
     private val _networkState = MutableStateFlow<UserListUiState>(UserListUiState.Loading)
-    val networkState: StateFlow<UserListUiState> = _networkState
+    val networkState = _networkState.asStateFlow()
 
     val localUsersState: StateFlow<List<User>> = userRepository.getAllUserStream()
         .stateIn(
@@ -46,13 +47,25 @@ class AdminUserListViewModel(private val userRepository: UserRepository) : ViewM
 
     fun deleteUser(user: User) {
         viewModelScope.launch {
-            userRepository.deleteUser(user.id)
+            _networkState.value = UserListUiState.Loading
+            try {
+                userRepository.deleteUser(user.id)
+                _networkState.value = UserListUiState.Success
+            } catch (e: Exception) {
+                _networkState.value = UserListUiState.Error("Erreur réseau : impossible de supprimer l'utilisateur")
+            }
         }
     }
 
     fun updateRole(userId: Int, newRole: String) {
         viewModelScope.launch {
-            userRepository.updateUserRole(userId, newRole)
+            _networkState.value = UserListUiState.Loading
+            try {
+                userRepository.updateUserRole(userId, newRole)
+                _networkState.value = UserListUiState.Success
+            } catch (e: Exception) {
+                _networkState.value = UserListUiState.Error("Erreur réseau : impossible de modifier le rôle")
+            }
         }
     }
 }

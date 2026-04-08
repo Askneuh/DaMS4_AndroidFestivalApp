@@ -72,7 +72,7 @@ fun ReservationDetailScreen(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ReservationDetailScreenContent(
-    uiState: ReservationDetailUIState,
+    uiState: ReservationDetailUiState,
     allAvailableGames: List<Game>,
     onBack: () -> Unit,
     onRefresh: () -> Unit,
@@ -112,8 +112,8 @@ fun ReservationDetailScreenContent(
 
             Box(modifier = Modifier.fillMaxSize()) {
                 when (uiState) {
-                    is ReservationDetailUIState.Loading -> CircularProgressIndicator(Modifier.align(Alignment.Center))
-                    is ReservationDetailUIState.Error -> {
+                    is ReservationDetailUiState.Loading -> CircularProgressIndicator(Modifier.align(Alignment.Center))
+                    is ReservationDetailUiState.Error -> {
                         Column(
                             modifier = Modifier.align(Alignment.Center).padding(16.dp),
                             horizontalAlignment = Alignment.CenterHorizontally,
@@ -124,7 +124,7 @@ fun ReservationDetailScreenContent(
                             TextButton(onClick = onClearError) { Text("Ignorer") }
                         }
                     }
-                    is ReservationDetailUIState.Success -> {
+                    is ReservationDetailUiState.Success -> {
                         when (selectedTabIndex) {
                             0 -> StatusTabContent(uiState.reservation, onStatusChange)
                             1 -> LogisticsTabContent(uiState.reservation, onUpdateLogistics)

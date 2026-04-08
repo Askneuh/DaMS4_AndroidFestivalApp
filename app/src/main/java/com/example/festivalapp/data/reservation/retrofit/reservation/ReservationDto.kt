@@ -1,6 +1,5 @@
 package com.example.festivalapp.data.reservation.retrofit.reservation
 
-import com.example.festivalapp.data.reservation.room.ReservationGame
 import kotlinx.serialization.Serializable
 
 @Serializable
@@ -49,10 +48,4 @@ data class ReservationGameDto(
     val isGamePlaced: Boolean,
     val quantity: Int,
     val idReservation: Int
-)
-private fun ReservationGameDto.toLinkEntity() = ReservationGame(
-    idReservation = idReservation,
-    idGame = id,
-    isGamePlaced = isGamePlaced,
-    quantity = quantity
 )

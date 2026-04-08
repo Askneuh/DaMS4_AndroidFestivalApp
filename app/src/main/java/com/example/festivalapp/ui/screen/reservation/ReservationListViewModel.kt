@@ -7,6 +7,7 @@ import com.example.festivalapp.data.reservation.ReservationRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
@@ -23,12 +24,11 @@ class ReservationListViewModel(
 ) : ViewModel() {
 
     private val _networkState = MutableStateFlow<ReservationListUiState>(ReservationListUiState.Loading)
-    val networkState: StateFlow<ReservationListUiState> = _networkState
+    val networkState = _networkState.asStateFlow()
 
     val searchQuery = MutableStateFlow("")
     val statusFilter = MutableStateFlow("all")
 
-    // --- Flux brut depuis Room ---
     private val _allItems = reservationRepository.getEditorsWithReservations(festivalName)
         .stateIn(
             scope = viewModelScope,

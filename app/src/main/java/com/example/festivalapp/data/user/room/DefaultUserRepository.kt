@@ -26,6 +26,6 @@ class DefaultUserRepository(
 
     override suspend fun updateUserRole(userId: Int, newRole: String) {
         api.updateUserRole(userId, UpdateRoleRequest(role = newRole))
-        refreshUsers()
+        userDAO.updateRole(userId, newRole)
     }
 }

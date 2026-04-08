@@ -50,6 +50,7 @@ class AppDataContainer(private val context: Context) : AppContainer {
 
     override val reservationRepository: ReservationRepository by lazy {
         ReservationRepository(
+<<<<<<< HEAD
             reservationDAO = FestivalDatabase.getDatabase(context).reservationDAO(),
             editorDAO = FestivalDatabase.getDatabase(context).editorDAO(),
             suiviDAO = FestivalDatabase.getDatabase(context).suiviReservationDAO(),
@@ -57,6 +58,14 @@ class AppDataContainer(private val context: Context) : AppContainer {
             reservationGameDAO = FestivalDatabase.getDatabase(context).reservationGameDAO(),
             reservationApi = RetrofitInstance.reservationApi,
             suiviApi = RetrofitInstance.suiviApi
+=======
+            FestivalDatabase.getDatabase(context).reservationDAO(),
+            FestivalDatabase.getDatabase(context).editorDAO(),
+            FestivalDatabase.getDatabase(context).suiviReservationDAO(),
+            FestivalDatabase.getDatabase(context).reservationGameDAO(),
+            RetrofitInstance.reservationApi,
+            RetrofitInstance.suiviApi
+>>>>>>> 5c34157 (feat: register, refactor code, TODO : link tariffZone to reservation, change navigation to go from reservationList to reservationDetail)
         )
     }
 

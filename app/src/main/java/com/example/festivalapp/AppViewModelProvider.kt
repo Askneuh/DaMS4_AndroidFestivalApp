@@ -7,6 +7,7 @@ import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
 import com.example.festivalapp.ui.screen.admin.users.AdminUserListViewModel
 import com.example.festivalapp.ui.screen.login.LoginViewModel
+import com.example.festivalapp.ui.screen.register.RegisterViewModel
 import com.example.festivalapp.ui.screen.reservation.ReservationDetailViewModel
 import com.example.festivalapp.ui.screen.reservation.ReservationListViewModel
 import com.example.festivalapp.ui.screen.festival.FestivalViewModel
@@ -20,6 +21,10 @@ object AppViewModelProvider {
         }
 
         initializer {
+            RegisterViewModel(repository = festivalApplication().container.authRepository,)
+        }
+
+        initializer {
             AdminUserListViewModel(userRepository = festivalApplication().container.userRepository)
         }
 
@@ -30,6 +35,7 @@ object AppViewModelProvider {
             )
         }
 
+<<<<<<< HEAD
         initializer {
             FestivalViewModel(festivalRepository = festivalApplication().container.festivalRepository)
         }
@@ -45,6 +51,12 @@ object AppViewModelProvider {
                 savedStateHandle = this.createSavedStateHandle()
             )
         }
+=======
+        initializer { ReservationDetailViewModel(
+            reservationRepository = festivalApplication().container.reservationRepository,
+            gameRepository = festivalApplication().container.gameRepository
+        ) }
+>>>>>>> 5c34157 (feat: register, refactor code, TODO : link tariffZone to reservation, change navigation to go from reservationList to reservationDetail)
     }
 }
 

@@ -19,15 +19,29 @@ class GameRepository(
         }
     }
 
-    suspend fun getGamesByEditor(idEditor: Int): List<Game> {
+    suspend fun getGamesByEditor(idEditor: Int): Flow<List<Game>> {
         return try {
             val remote = api.getGamesByEditor(idEditor)
             gameDAO.insertAll(remote.map { it.toEntity() })
-            gameDAO.getGamesByEditor(idEditor)
+            gameDAO.getGamesStreamByEditor(idEditor)
         } catch (e: Exception) {
-            gameDAO.getGamesByEditor(idEditor)
+            gameDAO.getGamesStreamByEditor(idEditor)
         }
     }
+
+    fun getGamesStreamByEditor(idEditor: Int): Flow<List<Game>> {
+        return gameDAO.getGamesStreamByEditor(idEditor)
+    }
+
+    suspend fun refreshGamesByEditor(idEditor: Int) {
+        try {
+            val remote = api.getGamesByEditor(idEditor)
+            gameDAO.insertAll(remote.map { it.toEntity() })
+        } catch (e: Exception) {
+
+        }
+    }
+
 
     suspend fun searchGames(query: String): List<Game> {
         return gameDAO.searchGames(query)

@@ -37,10 +37,7 @@ interface GameDAO {
     suspend fun getGameById(gameId: Int): Game?
 
     @Query("SELECT * FROM games WHERE idEditor = :idEditor ORDER BY name ASC")
-    suspend fun getGamesByEditor(idEditor: Int): List<Game>
-
-    @Query("SELECT * FROM games WHERE idEditor != :idEditor ORDER BY name ASC")
-    suspend fun getGamesNotByEditor(idEditor: Int): List<Game>
+    fun getGamesStreamByEditor(idEditor: Int): Flow<List<Game>>
 
     @Query("SELECT * FROM games WHERE name LIKE '%' || :query || '%' ORDER BY name ASC")
     suspend fun searchGames(query: String): List<Game>

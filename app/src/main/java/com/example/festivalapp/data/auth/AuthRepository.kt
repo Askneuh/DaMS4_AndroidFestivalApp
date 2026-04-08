@@ -26,6 +26,19 @@ class AuthRepository(
         tokenManager.clearSession()
     }
 
+    suspend fun register(login: String, password: String): Result<String> {
+        return try {
+            val response = api.register(LoginRequest(login, password))
+            if (response.isSuccessful && response.body() != null) {
+                Result.success(value = "Register Succeded")
+            } else {
+                Result.failure(Exception("Register Failed"))
+            }
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
 
 }
 

@@ -32,7 +32,8 @@ import com.example.festivalapp.ui.screen.login.LoginRoute
 import com.example.festivalapp.ui.screen.login.LoginScreen
 import com.example.festivalapp.ui.screen.login.LoginScreenContent
 import com.example.festivalapp.ui.screen.login.LoginViewModel
-import com.example.festivalapp.ui.screen.login.LoginViewModelFactory
+import com.example.festivalapp.ui.screen.register.RegisterRoute
+import com.example.festivalapp.ui.screen.register.RegisterScreen
 import com.example.festivalapp.ui.screen.reservation.ReservationDetailRoute
 import com.example.festivalapp.ui.screen.reservation.ReservationListRoute
 >>>>>>> 82c0fb8 (a lot of things)
@@ -84,6 +85,7 @@ class MainActivity : ComponentActivity() {
                 if (role != null) {
                     val scope = rememberCoroutineScope()
                     var selectedReservationId by remember { mutableStateOf<Int?>(null) }
+
                     if (selectedReservationId == null) {
                         ReservationListRoute(
                             reservationRepository = app.container.reservationRepository,

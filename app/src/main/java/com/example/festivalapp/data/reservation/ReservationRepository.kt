@@ -1,9 +1,6 @@
 package com.example.festivalapp.data.reservation
 
-import com.example.festivalapp.data.RetrofitInstance
 import com.example.festivalapp.data.editor.room.EditorDAO
-import com.example.festivalapp.data.game.room.Game
-import com.example.festivalapp.data.game.room.GameDAO
 import com.example.festivalapp.data.reservation.retrofit.AddGameRequest
 import com.example.festivalapp.data.reservation.retrofit.UpdateGameRequest
 import com.example.festivalapp.data.reservation.retrofit.UpdateReservationRequest
@@ -23,7 +20,6 @@ class ReservationRepository(
     private val reservationDAO: ReservationDAO,
     private val editorDAO: EditorDAO,
     private val suiviDAO: SuiviReservationDAO,
-    private val gameDAO: GameDAO,
     private val reservationGameDAO: ReservationGameDAO,
     private val reservationApi: ReservationApiService,
     private val suiviApi: SuiviApiService
@@ -57,23 +53,17 @@ class ReservationRepository(
     }
 
     suspend fun refreshReservationDetail(reservationId: Int) {
-        try {
-            val reservationDto = reservationApi.getReservationById(reservationId)
-            reservationDAO.insert(reservationDto.toEntity())
+        val reservationDto = reservationApi.getReservationById(reservationId)
+        reservationDAO.insert(reservationDto.toEntity())
 
-            val gamesDtoList = reservationApi.getReservationGames(reservationId)
-            gameDAO.insertAll(gamesDtoList.map { it.toGameEntity() })
-            reservationGameDAO.replaceAllGamesForReservation(
-                reservationId,
-                gamesDtoList.map { it.toLinkEntity() }
-            )
+        val gamesDtoList = reservationApi.getReservationGames(reservationId)
+        reservationGameDAO.replaceAllGamesForReservation(
+            reservationId,
+            gamesDtoList.map { it.toLinkEntity() }
+        )
 
-            val suiviDtoList = suiviApi.getByReservation(reservationId)
-            suiviDAO.insertAll(suiviDtoList.map { it.toEntity() })
-
-        } catch (e: Exception) {
-            throw e
-        }
+        val suiviDtoList = suiviApi.getByReservation(reservationId)
+        suiviDAO.insertAll(suiviDtoList.map { it.toEntity() })
     }
 
 
@@ -83,19 +73,17 @@ class ReservationRepository(
     }
 
     suspend fun addGameToReservation(reservationId: Int, gameId: Int, quantity: Int) {
-        val optimisticLink = ReservationGame(
+        // Appelle l'API en attendant la garantie d'ajout
+        reservationApi.addGame(reservationId, AddGameRequest(gameId, quantity))
+        
+        // Si tout s'est bien passé, on insère la donnée définitivement localement
+        // Cela empêche l'app de demander une liste serveur qui n'est peut-être pas encore prête
+        val validLink = ReservationGame(
             idReservation = reservationId,
             idGame = gameId,
             quantity = quantity
         )
-        reservationGameDAO.insert(optimisticLink)
-        try {
-            reservationApi.addGame(reservationId, AddGameRequest(gameId, quantity))
-            refreshReservationDetail(reservationId)
-        } catch (e: Exception) {
-            reservationGameDAO.deleteGameFromReservation(reservationId, gameId)
-            throw e
-        }
+        reservationGameDAO.insert(validLink)
     }
 
     suspend fun removeGameFromReservation(reservationId: Int, gameId: Int) {
@@ -111,7 +99,6 @@ class ReservationRepository(
     suspend fun updateReservationGame(reservationId: Int, gameId: Int, quantity: Int, isPlaced: Boolean) {
         reservationApi.updateGameInReservation(reservationId, gameId, UpdateGameRequest(quantity, isPlaced))
         reservationGameDAO.updateGameQuantityAndPlacement(reservationId, gameId, quantity, isPlaced)
-        refreshReservationDetail(reservationId)
     }
 
 }
@@ -133,15 +120,7 @@ private fun ReservationDetailDto.toEntity() = Reservation(
     idTZ = idTZ
 )
 
-private fun ReservationGameDto.toGameEntity() = Game(
-    id = id,
-    name = name,
-    author = author ?: "Inconnu",
-    gameImage = gameImage ?: "",
-    nbMinPlayer = 0, nbMaxPlayer = 0, gameNotice = "", idGameType = 0,
-    minimumAge = 0, prototype = false, duration = 0, theme = "",
-    description = "", rulesTutorial = "", edition = 0, idEditor = 0
-)
+
 
 private fun ReservationGameDto.toLinkEntity() = ReservationGame(
     idReservation = idReservation,

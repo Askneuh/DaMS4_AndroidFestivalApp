@@ -17,16 +17,26 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import kotlin.collections.emptyList
 import android.util.Log
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.filterNotNull
+import kotlinx.coroutines.flow.flatMapLatest
 
-sealed interface ReservationDetailUIState {
-    object Loading : ReservationDetailUIState
+sealed interface ReservationDetailUiState {
+    object Loading : ReservationDetailUiState
     data class Success(
         val reservation: Reservation,
         val games: List<GameWithReservationInfo>,
         val suivis: List<SuiviReservation>
-    ) : ReservationDetailUIState
-    data class Error(val message: String) : ReservationDetailUIState
+    ) : ReservationDetailUiState
+    data class Error(val message: String) : ReservationDetailUiState
+}
+
+sealed interface NetworkState {
+    object Loading : NetworkState
+    object Success : NetworkState
+    data class Error(val message: String) : NetworkState
 }
 
 class ReservationDetailViewModel(
@@ -36,66 +46,78 @@ class ReservationDetailViewModel(
 ): ViewModel() {
     private val reservationId: Int = checkNotNull(savedStateHandle["reservationId"])
 
-    private val _errorMessage = MutableStateFlow<String?>(null)
+    private val _networkState = MutableStateFlow<NetworkState>(NetworkState.Loading)
+    val networkState = _networkState.asStateFlow()
 
-    private val _availableGames = MutableStateFlow<List<Game>>(emptyList())
-    private var lastLoadedEditorId: Int? = null
-    val availableGames: StateFlow<List<Game>> = _availableGames
-    val uiState: StateFlow<ReservationDetailUIState> = combine(
+    @OptIn(ExperimentalCoroutinesApi::class)
+    val availableGames: StateFlow<List<Game>> = reservationRepository.getReservationStream(reservationId)
+        .filterNotNull()
+        .flatMapLatest { reservation ->
+            gameRepository.getGamesStreamByEditor(reservation.idEditor)
+        }
+        .stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(5000L),
+            initialValue = emptyList()
+        )
+
+    val uiState: StateFlow<ReservationDetailUiState> = combine(
         reservationRepository.getReservationStream(reservationId),
         reservationRepository.getGamesStream(reservationId),
         reservationRepository.getSuiviStream(reservationId),
-        _errorMessage
-    ) { reservation, games, suivis, error ->
-        if (error != null) {
-            ReservationDetailUIState.Error(error)
-        } else if (reservation != null) {
-            ReservationDetailUIState.Success(reservation, games, suivis)
+        _networkState
+    ) { reservation, games, suivis, network ->
+        if (reservation != null) {
+            ReservationDetailUiState.Success(reservation, games, suivis)
+        } else if (network is NetworkState.Error) {
+            ReservationDetailUiState.Error(network.message)
         } else {
-            ReservationDetailUIState.Loading
+            ReservationDetailUiState.Loading
         }
     }.stateIn(
         scope = viewModelScope,
         started = SharingStarted.WhileSubscribed(5000L),
-        initialValue = ReservationDetailUIState.Loading
+        initialValue = ReservationDetailUiState.Loading
     )
 
     init {
         refresh()
         viewModelScope.launch {
             reservationRepository.getReservationStream(reservationId)
+                .filterNotNull()
                 .collect { reservation ->
-                    reservation?.let { loadGamesForReservation(it.idEditor) }
+                    gameRepository.refreshGamesByEditor(reservation.idEditor)
                 }
         }
     }
 
     fun refresh() {
         viewModelScope.launch {
+            _networkState.value = NetworkState.Loading
             try {
                 reservationRepository.refreshReservationDetail(reservationId)
+                _networkState.value = NetworkState.Success
             } catch (e: Exception) {
-                _errorMessage.value = "Erreur de chargement : ${e.message}"
+                _networkState.value = NetworkState.Error("Erreur réseau : impossible de rafraîchir les données")
             }
         }
     }
 
-    /** Réinitialise l'erreur (ex. après affichage dans l'UI ou au retry) */
-    fun clearError() {
-        _errorMessage.value = null
-    }
-
     fun updateStatus(newStatus: String) {
         viewModelScope.launch {
+            _networkState.value = NetworkState.Loading
             try {
                 reservationRepository.updateLogistics(reservationId, UpdateReservationRequest(status = newStatus))
+                _networkState.value = NetworkState.Success
             } catch (e: Exception) {
+                _networkState.value = NetworkState.Error("Erreur réseau : impossible de modifier le statut")
             }
         }
     }
 
     fun updateLogistics(nbSmall: Int, nbLarge: Int, nbCity: Int, m2: Int, remise: Double) {
         viewModelScope.launch {
+            _networkState.value = NetworkState.Loading
             try {
                 reservationRepository.updateLogistics(reservationId, UpdateReservationRequest(
                     nbSmallTables = nbSmall,
@@ -104,13 +126,16 @@ class ReservationDetailViewModel(
                     m2 = m2,
                     remise = remise
                 ))
+                _networkState.value = NetworkState.Success
             } catch (e: Exception) {
+                _networkState.value = NetworkState.Error("Erreur réseau : impossible de modifier la logistique")
             }
         }
     }
 
     fun updateOrga(typeAnim: Int, listD: Boolean, listR: Boolean, jeuxR: Boolean) {
         viewModelScope.launch {
+            _networkState.value = NetworkState.Loading
             try {
                 reservationRepository.updateLogistics(reservationId, UpdateReservationRequest(
                     typeAnimateur = typeAnim,
@@ -118,51 +143,50 @@ class ReservationDetailViewModel(
                     listeRecue = listR,
                     jeuxRecus = jeuxR
                 ))
+                _networkState.value = NetworkState.Success
             } catch (e: Exception) {
-            }
-        }
-    }
-
-
-
-    private fun loadGamesForReservation(idEditor: Int) {
-        if (idEditor == lastLoadedEditorId && _availableGames.value.isNotEmpty()) return
-        
-        viewModelScope.launch {
-            try {
-                lastLoadedEditorId = idEditor
-                val editorGames = gameRepository.getGamesByEditor(idEditor)
-                _availableGames.value = editorGames
-            } catch (e: Exception) {
-                _errorMessage.value = "Erreur chargement jeux"
+                _networkState.value = NetworkState.Error("Erreur réseau : impossible de modifier l'organisation")
             }
         }
     }
 
     fun addGame(gameId: Int, quantity: Int) {
         viewModelScope.launch {
+            _networkState.value = NetworkState.Loading
             try {
                 reservationRepository.addGameToReservation(reservationId, gameId, quantity)
+                _networkState.value = NetworkState.Success
             } catch (e: Exception) {
-                _errorMessage.value = "Erreur lors de l'ajout du jeu"
-                Log.e("VM", "Erreur ajout", e)
+                _networkState.value = NetworkState.Error("Erreur réseau : impossible d'ajouter un jeu")
             }
         }
     }
+
     fun removeGame(gameId: Int) {
         viewModelScope.launch {
+            _networkState.value = NetworkState.Loading
             try {
                 reservationRepository.removeGameFromReservation(reservationId, gameId)
-            } catch (e: Exception) { /* Log error */ }
+                _networkState.value = NetworkState.Success
+            } catch (e: Exception) {
+                _networkState.value = NetworkState.Error("Erreur réseau : impossible de supprimer le jeu")
+            }
         }
     }
+
     fun updateGameInfo(gameId: Int, quantity: Int, isPlaced: Boolean) {
         viewModelScope.launch {
+            _networkState.value = NetworkState.Loading
             try {
                 reservationRepository.updateReservationGame(reservationId, gameId, quantity, isPlaced)
-            } catch (e: Exception) { /* Log error */ }
+                _networkState.value = NetworkState.Success
+            } catch (e: Exception) {
+                _networkState.value = NetworkState.Error("Erreur réseau : impossible de modifier les infos du jeu")
+            }
         }
     }
 
-
+    fun clearError() {
+        _networkState.value = NetworkState.Success
+    }
 }
