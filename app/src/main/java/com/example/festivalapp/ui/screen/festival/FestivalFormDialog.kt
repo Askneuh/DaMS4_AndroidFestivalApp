@@ -14,6 +14,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.example.festivalapp.data.festival.Festival
 import com.example.festivalapp.data.festival.TariffZone
+import com.example.festivalapp.data.festival.PlanZone
 //Version final de festival-zonetarifaire
 @Composable
 fun FestivalFormDialog(
@@ -22,12 +23,13 @@ fun FestivalFormDialog(
     onDismiss: () -> Unit,
     onSave: (Festival) -> Unit,
     onCalculateRemaining: (Festival) -> Map<String, Int>,
-    onPrepareFestival: (String, List<TariffZone>, String?, String?) -> Festival
+    onPrepareFestival: (String, List<TariffZone>, List<PlanZone>, String?, String?) -> Festival
 ) {
     var festivalName by remember { mutableStateOf(festival?.name ?: "") }
     var beginDate by remember { mutableStateOf(festival?.beginDate ?: "") }
     var endDate by remember { mutableStateOf(festival?.endDate ?: "") }
     var zones by remember { mutableStateOf(festival?.tariffZones?.toList() ?: emptyList()) }
+    var planZones by remember { mutableStateOf(festival?.planZones?.toList() ?: emptyList()) }
     var errorMessage by remember { mutableStateOf<String?>(null) }
 
     AlertDialog(
@@ -101,6 +103,35 @@ fun FestivalFormDialog(
                     Icon(Icons.Default.Add, contentDescription = null, modifier = Modifier.padding(end = 4.dp))
                     Text("Ajouter une zone")
                 }
+                Divider(modifier = Modifier.padding(vertical = 12.dp))
+                Text(
+                    text = "Zones du Plan (Géographique)",
+                    style = MaterialTheme.typography.titleMedium,
+                    modifier = Modifier.padding(bottom = 12.dp)
+                )
+                planZones.forEachIndexed { index, pZone ->
+                    PlanZoneFormField(
+                        planZone = pZone,
+                        availableTariffZones = zones,
+                        onPlanZoneChange = { updated ->
+                            planZones = planZones.toMutableList().apply { set(index, updated) }
+                        },
+                        onRemove = { planZones = planZones.toMutableList().apply { removeAt(index) } }
+                    )
+                }
+                Button(
+                    onClick = {
+                        planZones = planZones.toMutableList().apply {
+                            add(PlanZone(name = "", festivalName = festivalName))
+                        }
+                    },
+                    modifier = Modifier.fillMaxWidth().padding(bottom = 12.dp),
+                    colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.secondary)
+                ) {
+                    Icon(Icons.Default.Add, contentDescription = null)
+                    Text("Ajouter une zone plan")
+                }
+                
                 if (errorMessage != null) {
                     Text(
                         text = errorMessage!!,
@@ -142,6 +173,7 @@ fun FestivalFormDialog(
                     val prepared = onPrepareFestival(
                         festivalName, 
                         zones, 
+                        planZones,
                         beginDate.ifBlank { null }, 
                         endDate.ifBlank { null }
                     )
@@ -255,3 +287,57 @@ fun TariffZoneFormField(
         }
     }
 }
+
+@Composable
+fun PlanZoneFormField(
+    planZone: PlanZone,
+    availableTariffZones: List<TariffZone>,
+    onPlanZoneChange: (PlanZone) -> Unit,
+    onRemove: () -> Unit
+) {
+    Card(
+        modifier = Modifier.fillMaxWidth().padding(bottom = 12.dp),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.secondaryContainer.copy(alpha = 0.3f))
+    ) {
+        Column(modifier = Modifier.padding(12.dp)) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                OutlinedTextField(
+                    value = planZone.name,
+                    onValueChange = { onPlanZoneChange(planZone.copy(name = it)) },
+                    label = { Text("Nom zone plan") },
+                    modifier = Modifier.weight(1f)
+                )
+                IconButton(onClick = onRemove) {
+                    Icon(Icons.Default.Close, contentDescription = "Supprimer")
+                }
+            }
+            Spacer(modifier = Modifier.height(8.dp))
+            OutlinedTextField(
+                value = planZone.nbTables.toString(),
+                onValueChange = { onPlanZoneChange(planZone.copy(nbTables = it.toIntOrNull() ?: 0)) },
+                label = { Text("Nombre de tables") },
+                modifier = Modifier.fillMaxWidth()
+            )
+            Spacer(modifier = Modifier.height(8.dp))
+            
+            Text("Zone tarifaire liée :", style = MaterialTheme.typography.bodySmall)
+            
+            // Simple approach: list of buttons or a pseudo-dropdown
+            // For brevity, let's use a selection of chips
+            Row(modifier = Modifier.fillMaxWidth().verticalScroll(rememberScrollState())) {
+                availableTariffZones.forEach { tZone ->
+                    val isSelected = planZone.tariffZoneId == tZone.idTZ
+                    FilterChip(
+                        selected = isSelected,
+                        onClick = { onPlanZoneChange(planZone.copy(tariffZoneId = tZone.idTZ)) },
+                        label = { Text(tZone.name) },
+                        modifier = Modifier.padding(end = 4.dp)
+                    )
+                }
+            }
+            if (availableTariffZones.isEmpty()) {
+                Text("Veuillez d'abord créer au moins une zone tarifaire", color = MaterialTheme.colorScheme.error, fontSize = 10.sp)
+            }
+        }
+    }
+}

@@ -9,6 +9,7 @@ import kotlinx.coroutines.flow.map
 class FestivalRepository(
     private val festivalDao: FestivalDao,
     private val tariffZoneDao: TariffZoneDao,
+    private val planZoneDao: PlanZoneDao,
     private val apiService: APIService
 ) {
     // ========== READ OPERATIONS (Local First) ==========
@@ -45,11 +46,17 @@ class FestivalRepository(
         return try {
             val entity = festival.toEntity()
             festivalDao.insertFestival(entity)
-            
+
             festival.tariffZones.forEach { zone ->
                 tariffZoneDao.insertZone(zone.toEntity())
             }
             
+            // 3️⃣ Sauvegarder les zones du plan localement
+            festival.planZones.forEach { planZone ->
+                planZoneDao.insertPlanZone(planZone.toEntity())
+            }
+
+            // 4️⃣ En background: envoyer à l'API
             try {
                 val apiResult = apiService.createFestival(festival)
                 festivalDao.insertFestival(apiResult.toEntity())
@@ -69,12 +76,19 @@ class FestivalRepository(
         return try {
             val entity = festival.toEntity()
             festivalDao.updateFestival(entity)
-            
+
             tariffZoneDao.deleteZonesByFestival(festival.name)
             festival.tariffZones.forEach { zone ->
                 tariffZoneDao.insertZone(zone.toEntity())
             }
             
+            // 3️⃣ Gérer les zones du plan localement
+            planZoneDao.deletePlanZonesByFestival(festival.name)
+            festival.planZones.forEach { planZone ->
+                planZoneDao.insertPlanZone(planZone.toEntity())
+            }
+
+            // 4️⃣ En background: envoyer à l'API
             try {
                 val apiResult = apiService.updateFestivalByName(originalName, festival)
                 festivalDao.updateFestival(apiResult.toEntity())
@@ -93,9 +107,11 @@ class FestivalRepository(
 
     suspend fun deleteFestival(name: String): Result<Unit> {
         return try {
+            // 1️⃣ Supprimer localement IMMÉDIATEMENT
+            planZoneDao.deletePlanZonesByFestival(name)
             tariffZoneDao.deleteZonesByFestival(name)
             festivalDao.deleteFestivalByName(name)
-            
+
             try {
                 apiService.deleteFestival(name)
                 Result.success(Unit)
@@ -145,6 +161,7 @@ class FestivalRepository(
             nbCityHallTables = nbCityHallTables,
             isCurrent = isCurrent,
             tariffZones = zones,
+            planZones = emptyList(), // On le remplira via un autre helper si nécessaire ou on modifie le flow
             creationDate = creationDate,
             beginDate = beginDate,
             endDate = endDate
@@ -170,6 +187,26 @@ class FestivalRepository(
         )
     }
 
+    private fun PlanZone.toEntity(): PlanZoneEntity {
+        return PlanZoneEntity(
+            id = id,
+            name = name,
+            nbTables = nbTables,
+            festivalName = festivalName,
+            tariffZoneId = tariffZoneId
+        )
+    }
+
+    private fun PlanZoneEntity.toPlanZone(): PlanZone {
+        return PlanZone(
+            id = id,
+            name = name,
+            nbTables = nbTables,
+            festivalName = festivalName,
+            tariffZoneId = tariffZoneId
+        )
+    }
+
     private fun TariffZoneEntity.toTariffZone(): TariffZone {
         return TariffZone(
             idTZ = idTZ,
@@ -184,7 +221,7 @@ class FestivalRepository(
             squareMeterPrice = squareMeterPrice
         )
     }
-
+    // ========== SYNC FROM API ==========
     suspend fun syncAllFestivalsFromApi(): List<Festival> {
         return try {
             val festivalsFromApi = apiService.getAllFestivals()

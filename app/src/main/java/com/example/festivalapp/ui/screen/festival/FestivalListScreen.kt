@@ -8,7 +8,7 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.compose.ui.unit.sp
 import com.example.festivalapp.data.festival.Festival
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
@@ -65,6 +65,26 @@ fun FestivalListScreen(
                 }
             }
         }
+    }
+    
+    if (uiState.showForm) {
+        FestivalFormDialog(
+            festival = uiState.selectedFestival,
+            isEditMode = uiState.isEditMode,
+            onDismiss = { viewModel.closeForm() },
+            onSave = { festival ->
+                if (uiState.isEditMode && uiState.selectedFestival != null) {
+                    viewModel.updateFestival(uiState.selectedFestival!!.name, festival)
+                } else {
+                    viewModel.createFestival(festival)
+                }
+            },
+            onCalculateRemaining = { viewModel.calculateRemainingTables(it) },
+            onPrepareFestival = { name, tZones, pZones, begin, end ->
+                viewModel.prepareFestivalForSave(name, tZones, pZones, begin, end)
+            }
+
+        )
     }
 }
 
