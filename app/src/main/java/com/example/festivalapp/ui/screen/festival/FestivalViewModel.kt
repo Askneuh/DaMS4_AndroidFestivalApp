@@ -5,6 +5,7 @@ import androidx.lifecycle.viewModelScope
 import com.example.festivalapp.data.festival.Festival
 import com.example.festivalapp.data.festival.FestivalRepository
 import com.example.festivalapp.data.festival.TariffZone
+import com.example.festivalapp.data.festival.PlanZone
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow

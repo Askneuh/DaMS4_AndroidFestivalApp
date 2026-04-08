@@ -2,7 +2,7 @@ package com.example.festivalapp.data
 
 import com.example.festivalapp.data.auth.LoginRequest
 import com.example.festivalapp.data.auth.LoginResponse
-import com.example.festivalapp.data.user.room.UserDto
+import com.example.festivalapp.data.user.retrofit.UserDto
 import com.example.festivalapp.data.festival.Festival
 import retrofit2.Response
 import retrofit2.http.Body

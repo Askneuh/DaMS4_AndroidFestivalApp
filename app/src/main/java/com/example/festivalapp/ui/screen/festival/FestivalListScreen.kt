@@ -17,6 +17,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.festivalapp.data.festival.Festival
+import com.example.festivalapp.data.festival.PlanZone
 
 @Composable
 fun FestivalListScreen(
@@ -172,7 +173,7 @@ fun FestivalCard(
             Text(text = "Tables mairie: ${festival.nbCityHallTables}", fontSize = 12.sp)
             
             if (festival.tariffZones.isNotEmpty()) {
-                Divider(modifier = Modifier.padding(vertical = 8.dp))
+                HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))
                 Text(
                     text = "Zones (${festival.tariffZones.size}) :",
                     fontWeight = FontWeight.Bold,

@@ -168,7 +168,7 @@ class FestivalRepository(
         )
     }
 
-    private fun FestivalEntity.toFestival(zones: List<TariffZone>): Festival {
+    private fun FestivalEntity.toFestival(zones: List<TariffZone>, pZones: List<PlanZone> = emptyList()): Festival {
         return Festival(
             name = name,
             nbSmallTables = nbSmallTables,
@@ -176,7 +176,7 @@ class FestivalRepository(
             nbCityHallTables = nbCityHallTables,
             isCurrent = isCurrent,
             tariffZones = zones,
-            planZones = emptyList(), // On le remplira via un autre helper si nécessaire ou on modifie le flow
+            planZones = pZones,
             creationDate = creationDate,
             beginDate = beginDate,
             endDate = endDate
@@ -184,7 +184,10 @@ class FestivalRepository(
     }
 
     private fun FestivalWithZones.toFestival(): Festival {
-        return festival.toFestival(zones.map { it.toTariffZone() })
+        return festival.toFestival(
+            zones.map { it.toTariffZone() },
+            planZones.map { it.toPlanZone() }
+        )
     }
 
     private fun TariffZone.toEntity(): TariffZoneEntity {
