@@ -36,11 +36,12 @@ class AppDataContainer(private val context: Context) : AppContainer {
             api = RetrofitInstance.userApi
         )
     }
+
     override val reservationRepository: ReservationRepository by lazy {
         ReservationRepository(
             reservationDAO = FestivalDatabase.getDatabase(context).reservationDAO(),
             editorDAO = FestivalDatabase.getDatabase(context).editorDAO(),
-            api = RetrofitInstance.reservationApi  // ← injecté ici
+            api = RetrofitInstance.reservationApi
         )
     }
 
@@ -50,10 +51,10 @@ class AppDataContainer(private val context: Context) : AppContainer {
 
     override val festivalRepository: FestivalRepository by lazy {
         FestivalRepository(
-            FestivalDatabase.getDatabase(context).festivalDao(),
-            FestivalDatabase.getDatabase(context).tariffZoneDao(),
-            FestivalDatabase.getDatabase(context).planZoneDao(),
-            RetrofitInstance.api
+            festivalDao = FestivalDatabase.getDatabase(context).festivalDao(),
+            tariffZoneDao = FestivalDatabase.getDatabase(context).tariffZoneDao(),
+            planZoneDao = FestivalDatabase.getDatabase(context).planZoneDao(),
+            apiService = RetrofitInstance.api
         )
     }
 

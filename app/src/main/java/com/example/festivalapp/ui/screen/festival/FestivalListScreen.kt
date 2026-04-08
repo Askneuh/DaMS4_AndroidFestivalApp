@@ -4,6 +4,10 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
@@ -26,8 +30,11 @@ fun FestivalListScreen(
     onMenuClick: () -> Unit
 ) {
     val uiState by viewModel.uiState.collectAsState()
-    val festivals = uiState.festivals
-    val isLoading = uiState.isLoading
+
+    LaunchedEffect(Unit) {
+        viewModel.loadCurrentFestival()
+         viewModel.loadAllFestivals()
+    }
 
     Scaffold(
         topBar = {
@@ -45,24 +52,81 @@ fun FestivalListScreen(
                 Icon(Icons.Default.Add, contentDescription = "Créer un festival")
             }
         }
-    ) { padding ->
-        if (isLoading) {
-            Box(Modifier.fillMaxSize().padding(padding), contentAlignment = Alignment.Center) {
-                CircularProgressIndicator()
-            }
-        } else {
-            LazyColumn(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(padding),
-                contentPadding = PaddingValues(16.dp),
-                verticalArrangement = Arrangement.spacedBy(8.dp)
-            ) {
-                items(festivals) { festival ->
-                    FestivalItem(
-                        festival = festival,
-                        onClick = { onNavigateToFestivalDetail(festival.name) }
+    ) { paddingValues ->
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(paddingValues)
+        ) {
+            Text(
+                text = "Liste des Festivals",
+                fontSize = 28.sp,
+                fontWeight = FontWeight.Bold,
+                modifier = Modifier.padding(16.dp)
+            )
+
+            if (uiState.successMessage != null) {
+                Card(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 16.dp)
+                        .padding(bottom = 16.dp),
+                    colors = CardDefaults.cardColors(containerColor = Color(0xFFD4EDDA))
+                ) {
+                    Text(
+                        text = uiState.successMessage!!,
+                        modifier = Modifier.padding(12.dp),
+                        color = Color(0xFF155724)
                     )
+                }
+            }
+
+            if (uiState.error != null) {
+                Card(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 16.dp)
+                        .padding(bottom = 16.dp),
+                    colors = CardDefaults.cardColors(containerColor = Color(0xFFF8D7DA))
+                ) {
+                    Text(
+                        text = uiState.error!!,
+                        modifier = Modifier.padding(12.dp),
+                        color = Color(0xFF721C24)
+                    )
+                }
+            }
+
+            if (uiState.isLoading && uiState.festivals.isEmpty()) {
+                CircularProgressIndicator(
+                    modifier = Modifier
+                        .align(Alignment.CenterHorizontally)
+                        .padding(32.dp)
+                )
+            } else if (uiState.festivals.isEmpty()) {
+                Text(
+                    text = "Aucun festival disponible",
+                    modifier = Modifier
+                        .align(Alignment.CenterHorizontally)
+                        .padding(32.dp)
+                )
+            } else {
+                LazyColumn(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 16.dp),
+                    verticalArrangement = Arrangement.spacedBy(12.dp),
+                    contentPadding = PaddingValues(8.dp)
+                ) {
+                    items(uiState.festivals) { festival ->
+                        FestivalCard(
+                            festival = festival,
+                            isCurrent = festival.name == uiState.currentFestival?.name,
+                            onEdit = { viewModel.openForm(festival) },
+                            onDelete = { viewModel.deleteFestival(festival.name) },
+                            onMakeCurrent = { viewModel.setCurrentFestival(festival.name) }
+                        )
+                    }
                 }
             }
         }
@@ -84,7 +148,6 @@ fun FestivalListScreen(
             onPrepareFestival = { name, tZones, pZones, begin, end ->
                 viewModel.prepareFestivalForSave(name, tZones, pZones, begin, end)
             }
-
         )
     }
 }
@@ -92,24 +155,77 @@ fun FestivalListScreen(
 @Composable
 fun FestivalItem(
     festival: Festival,
-    onClick: () -> Unit
+    isCurrent: Boolean,
+    onEdit: () -> Unit,
+    onDelete: () -> Unit,
+    onMakeCurrent: () -> Unit
 ) {
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            .clickable(onClick = onClick)
+            .then(if (isCurrent) Modifier.border(2.dp, MaterialTheme.colorScheme.primary) else Modifier),
+        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
     ) {
-        Column(modifier = Modifier.padding(16.dp)) {
-            Text(festival.name, style = MaterialTheme.typography.titleLarge)
+        Column(modifier = Modifier.padding(12.dp)) {
             Text(
-                "Du ${festival.beginDate ?: "?"} au ${festival.endDate ?: "?"}",
-                style = MaterialTheme.typography.bodyMedium
+                text = festival.name,
+                fontWeight = FontWeight.Bold,
+                fontSize = 16.sp,
+                modifier = Modifier.padding(bottom = 8.dp)
             )
-            HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))
-            Text(
-                "Tables: ${festival.nbSmallTables}p, ${festival.nbLargeTables}g, ${festival.nbCityHallTables}m",
-                style = MaterialTheme.typography.bodySmall
-            )
+            if (isCurrent) {
+                AssistChip(
+                    onClick = {},
+                    label = { Text("Festival courant", fontSize = 10.sp) },
+                    modifier = Modifier.padding(bottom = 8.dp)
+                )
+            }
+            Text(text = "Petites tables: ${festival.nbSmallTables}", fontSize = 12.sp)
+            Text(text = "Grandes tables: ${festival.nbLargeTables}", fontSize = 12.sp)
+            Text(text = "Tables mairie: ${festival.nbCityHallTables}", fontSize = 12.sp)
+
+            if (festival.tariffZones.isNotEmpty()) {
+                HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))
+                Text(
+                    text = "Zones (${festival.tariffZones.size}) :",
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 12.sp,
+                    modifier = Modifier.padding(bottom = 4.dp)
+                )
+                festival.tariffZones.forEach { zone ->
+                    Row(
+                        modifier = Modifier.fillMaxWidth().padding(bottom = 2.dp),
+                        horizontalArrangement = Arrangement.SpaceBetween
+                    ) {
+                        Text(text = "• ${zone.name}", fontSize = 11.sp, modifier = Modifier.weight(1f))
+                        Text(
+                            text = "${(zone.nbSmallTables ?: 0) + (zone.nbLargeTables ?: 0) + (zone.nbCityHallTables ?: 0)} tables",
+                            fontSize = 11.sp,
+                            color = MaterialTheme.colorScheme.secondary
+                        )
+                    }
+                }
+            }
+
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(top = 8.dp),
+                horizontalArrangement = Arrangement.spacedBy(4.dp)
+            ) {
+                IconButton(onClick = onEdit, modifier = Modifier.size(32.dp)) {
+                    Icon(Icons.Default.Edit, contentDescription = "Modifier", tint = MaterialTheme.colorScheme.primary)
+                }
+                IconButton(onClick = onDelete, modifier = Modifier.size(32.dp)) {
+                    Icon(Icons.Default.Delete, contentDescription = "Supprimer", tint = MaterialTheme.colorScheme.error)
+                }
+            }
+            if (!isCurrent) {
+                Button(onClick = onMakeCurrent, modifier = Modifier.fillMaxWidth().padding(top = 8.dp)) {
+                    Text("Définir comme courant")
+                }
+            }
+
         }
     }
 }

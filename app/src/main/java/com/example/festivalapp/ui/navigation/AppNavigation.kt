@@ -131,7 +131,7 @@ fun AppNavigation(
                 is AppDestinations.Login -> NavEntry(key) {
                     LoginScreen(
                         viewModel = viewModel(factory = AppViewModelProvider.Factory),
-                        onLoginSuccess = { 
+                        onLoginSuccess = {
                             controller.navigateTo(AppDestinations.Home)
                         }
                     )
