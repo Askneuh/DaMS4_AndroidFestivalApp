@@ -145,6 +145,7 @@ fun syncFestivalsFromApi() {
     fun prepareFestivalForSave(
         name: String,
         tariffZones: List<TariffZone>,
+        planZones: List<PlanZone> = emptyList(),
         beginDate: String? = null,
         endDate: String? = null
     ): Festival {
@@ -161,6 +162,10 @@ fun syncFestivalsFromApi() {
         val zonesWithName = tariffZones.map { zone ->
             zone.copy(festivalName = name)
         }
+
+        val planZonesWithName = planZones.map { pZone ->
+            pZone.copy(festivalName = name)
+        }
         
         return Festival(
             name = name,
@@ -172,10 +177,12 @@ fun syncFestivalsFromApi() {
             remainingCityHallTables = totalCityHall,
             isCurrent = false,
             tariffZones = zonesWithName,
+            planZones = planZonesWithName,
             beginDate = beginDate,
             endDate = endDate
         )
     }
+
 
     fun calculateRemainingTables(festival: Festival): Map<String, Int> {
         if (festival.tariffZones.isEmpty()) {

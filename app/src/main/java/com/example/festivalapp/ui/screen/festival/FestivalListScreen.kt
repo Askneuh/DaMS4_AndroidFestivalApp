@@ -131,9 +131,10 @@ fun FestivalListScreen(
                 }
             },
             onCalculateRemaining = { viewModel.calculateRemainingTables(it) },
-            onPrepareFestival = { name, zones, begin, end ->
-                viewModel.prepareFestivalForSave(name, zones, begin, end)
+            onPrepareFestival = { name, tZones, pZones, begin, end ->
+                viewModel.prepareFestivalForSave(name, tZones, pZones, begin, end)
             }
+
         )
     }
 }
@@ -169,6 +170,30 @@ fun FestivalCard(
             Text(text = "Petites tables: ${festival.nbSmallTables}", fontSize = 12.sp)
             Text(text = "Grandes tables: ${festival.nbLargeTables}", fontSize = 12.sp)
             Text(text = "Tables mairie: ${festival.nbCityHallTables}", fontSize = 12.sp)
+            
+            if (festival.tariffZones.isNotEmpty()) {
+                Divider(modifier = Modifier.padding(vertical = 8.dp))
+                Text(
+                    text = "Zones (${festival.tariffZones.size}) :",
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 12.sp,
+                    modifier = Modifier.padding(bottom = 4.dp)
+                )
+                festival.tariffZones.forEach { zone ->
+                    Row(
+                        modifier = Modifier.fillMaxWidth().padding(bottom = 2.dp),
+                        horizontalArrangement = Arrangement.SpaceBetween
+                    ) {
+                        Text(text = "• ${zone.name}", fontSize = 11.sp, modifier = Modifier.weight(1f))
+                        Text(
+                            text = "${(zone.nbSmallTables ?: 0) + (zone.nbLargeTables ?: 0) + (zone.nbCityHallTables ?: 0)} tables",
+                            fontSize = 11.sp,
+                            color = MaterialTheme.colorScheme.secondary
+                        )
+                    }
+                }
+            }
+
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -184,9 +209,10 @@ fun FestivalCard(
             }
             if (!isCurrent) {
                 Button(onClick = onMakeCurrent, modifier = Modifier.fillMaxWidth().padding(top = 8.dp)) {
-                    Text("Courant")
+                    Text("Définir comme courant")
                 }
             }
+
         }
     }
 }

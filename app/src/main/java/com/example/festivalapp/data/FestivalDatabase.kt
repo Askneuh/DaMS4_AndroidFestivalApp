@@ -10,6 +10,8 @@ import com.example.festivalapp.data.festival.FestivalDao
 import com.example.festivalapp.data.festival.FestivalEntity
 import com.example.festivalapp.data.festival.TariffZoneDao
 import com.example.festivalapp.data.festival.TariffZoneEntity
+import com.example.festivalapp.data.festival.PlanZoneDao
+import com.example.festivalapp.data.festival.PlanZoneEntity
 import com.example.festivalapp.data.reservation.room.Reservation
 import com.example.festivalapp.data.reservation.room.ReservationDAO
 import com.example.festivalapp.data.user.room.User
@@ -21,9 +23,10 @@ import com.example.festivalapp.data.user.room.UserDAO
         TariffZoneEntity::class,
         User::class,
         Editor::class,
-        Reservation::class
+        Reservation::class,
+        PlanZoneEntity::class
     ],
-    version = 3, 
+    version = 4, 
     exportSchema = false
 )
 abstract class FestivalDatabase : RoomDatabase() {
@@ -31,6 +34,7 @@ abstract class FestivalDatabase : RoomDatabase() {
     // === Tes DAO ===
     abstract fun festivalDao(): FestivalDao
     abstract fun tariffZoneDao(): TariffZoneDao
+    abstract fun planZoneDao(): PlanZoneDao
     
     // === Les DAO de l'équipe ===
     abstract fun userDAO(): UserDAO

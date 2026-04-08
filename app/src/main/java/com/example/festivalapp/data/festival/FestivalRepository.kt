@@ -9,6 +9,7 @@ import kotlinx.coroutines.flow.map
 class FestivalRepository(
     private val festivalDao: FestivalDao,
     private val tariffZoneDao: TariffZoneDao,
+    private val planZoneDao: PlanZoneDao,
     private val apiService: APIService
 ) {
     // ========== READ OPERATIONS (Local First) ==========
@@ -52,7 +53,12 @@ class FestivalRepository(
                 tariffZoneDao.insertZone(zone.toEntity())
             }
             
-            // 3️⃣ En background: envoyer à l'API
+            // 3️⃣ Sauvegarder les zones du plan localement
+            festival.planZones.forEach { planZone ->
+                planZoneDao.insertPlanZone(planZone.toEntity())
+            }
+            
+            // 4️⃣ En background: envoyer à l'API
             try {
                 val apiResult = apiService.createFestival(festival)
                 // 4️⃣ Si succès API: mettre à jour BD locale avec réponse
@@ -82,7 +88,13 @@ class FestivalRepository(
                 tariffZoneDao.insertZone(zone.toEntity())
             }
             
-            // 3️⃣ En background: envoyer à l'API
+            // 3️⃣ Gérer les zones du plan localement
+            planZoneDao.deletePlanZonesByFestival(festival.name)
+            festival.planZones.forEach { planZone ->
+                planZoneDao.insertPlanZone(planZone.toEntity())
+            }
+            
+            // 4️⃣ En background: envoyer à l'API
             try {
                 val apiResult = apiService.updateFestivalByName(originalName, festival)
                 // 4️⃣ Si succès API: mettre à jour BD locale
@@ -104,6 +116,7 @@ class FestivalRepository(
     suspend fun deleteFestival(name: String): Result<Unit> {
         return try {
             // 1️⃣ Supprimer localement IMMÉDIATEMENT
+            planZoneDao.deletePlanZonesByFestival(name)
             tariffZoneDao.deleteZonesByFestival(name)
             festivalDao.deleteFestivalByName(name)
             
@@ -163,6 +176,7 @@ class FestivalRepository(
             nbCityHallTables = nbCityHallTables,
             isCurrent = isCurrent,
             tariffZones = zones,
+            planZones = emptyList(), // On le remplira via un autre helper si nécessaire ou on modifie le flow
             creationDate = creationDate,
             beginDate = beginDate,
             endDate = endDate
@@ -185,6 +199,26 @@ class FestivalRepository(
             largeTablePrice = largeTablePrice,
             cityHallTablePrice = cityHallTablePrice,
             squareMeterPrice = squareMeterPrice
+        )
+    }
+
+    private fun PlanZone.toEntity(): PlanZoneEntity {
+        return PlanZoneEntity(
+            id = id,
+            name = name,
+            nbTables = nbTables,
+            festivalName = festivalName,
+            tariffZoneId = tariffZoneId
+        )
+    }
+
+    private fun PlanZoneEntity.toPlanZone(): PlanZone {
+        return PlanZone(
+            id = id,
+            name = name,
+            nbTables = nbTables,
+            festivalName = festivalName,
+            tariffZoneId = tariffZoneId
         )
     }
 
