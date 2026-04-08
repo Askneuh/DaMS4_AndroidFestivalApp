@@ -140,7 +140,7 @@ fun AppNavigation(
                     FestivalListScreen(
                         viewModel = viewModel(factory = AppViewModelProvider.Factory),
                         onNavigateToCreate = { controller.navigateTo(AppDestinations.FestivalCreate()) },
-                        onNavigateToFestivalDetail = { id -> controller.navigateTo(AppDestinations.FestivalCreate(id.toInt())) },
+                        onNavigateToFestivalDetail = { id -> controller.navigateTo(AppDestinations.FestivalCreate(id)) },
                         onMenuClick = { controller.toggleDrawer() }
                     )
                 }

@@ -7,6 +7,7 @@ import com.example.festivalapp.data.festival.*
 import com.example.festivalapp.data.reservation.room.*
 import com.example.festivalapp.data.user.room.*
 import com.example.festivalapp.data.publisher.room.*
+import com.example.festivalapp.data.festival.FestivalEntity
 import com.example.festivalapp.data.festival.room.FestivalGameEntity
 
 @Database(
