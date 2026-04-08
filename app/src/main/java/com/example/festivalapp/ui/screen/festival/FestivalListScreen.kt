@@ -19,7 +19,7 @@ import androidx.compose.foundation.clickable
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun FestivalListScreen(
-    viewModel: FestivalViewModel = viewModel(),
+    viewModel: FestivalViewModel,
     onNavigateToCreate: () -> Unit,
     onNavigateToFestivalDetail: (String) -> Unit,
     onMenuClick: () -> Unit

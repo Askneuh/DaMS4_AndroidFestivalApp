@@ -20,6 +20,12 @@ object AppViewModelProvider {
         }
 
         initializer { ReservationListViewModel(reservationRepository = festivalApplication().container.reservationRepository) }
+
+        initializer {
+            com.example.festivalapp.ui.screen.festival.FestivalViewModel(
+                festivalRepository = festivalApplication().container.festivalRepository
+            )
+        }
     }
 }
 

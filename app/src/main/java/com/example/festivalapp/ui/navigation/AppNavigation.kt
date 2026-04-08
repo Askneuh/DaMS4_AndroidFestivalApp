@@ -27,7 +27,7 @@ import com.example.festivalapp.ui.screen.login.LoginViewModel
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import com.example.festivalapp.data.auth.AuthRepository
-import com.example.festivalapp.ui.screen.login.LoginViewModelFactory
+import com.example.festivalapp.AppViewModelProvider
 import com.example.festivalapp.ui.screen.festival.FestivalListScreen
 import com.example.festivalapp.ui.screen.festival.FestivalCreateScreen
 import com.example.festivalapp.ui.screen.publisher.PublisherListScreen
@@ -35,6 +35,7 @@ import com.example.festivalapp.ui.screen.publisher.PublisherDetailScreen
 import com.example.festivalapp.ui.screen.reservation.ReservationOverviewScreen
 import com.example.festivalapp.ui.screen.reservation.ReservationDetailScreen
 import com.example.festivalapp.ui.screen.reservation.FestivalGamesListScreen
+import com.example.festivalapp.ui.screen.festival.FestivalViewModel
 
 @Composable
 fun AppNavigation(
@@ -129,7 +130,7 @@ fun AppNavigation(
                 }
                 is AppDestinations.Login -> NavEntry(key) {
                     LoginScreen(
-                        viewModel = viewModel(factory = LoginViewModelFactory(authRepository)),
+                        viewModel = viewModel(factory = AppViewModelProvider.Factory),
                         onLoginSuccess = { 
                             controller.navigateTo(AppDestinations.Home)
                         }
@@ -137,6 +138,7 @@ fun AppNavigation(
                 }
                 is AppDestinations.FestivalList -> NavEntry(key) {
                     FestivalListScreen(
+                        viewModel = viewModel(factory = AppViewModelProvider.Factory),
                         onNavigateToCreate = { controller.navigateTo(AppDestinations.FestivalCreate()) },
                         onNavigateToFestivalDetail = { id -> controller.navigateTo(AppDestinations.FestivalCreate(id)) },
                         onMenuClick = { controller.toggleDrawer() }
@@ -180,7 +182,7 @@ fun AppNavigation(
                 }
                 else -> NavEntry(key) {
                     LoginScreen(
-                        viewModel = viewModel(factory = LoginViewModelFactory(authRepository)),
+                        viewModel = viewModel(factory = AppViewModelProvider.Factory),
                         onLoginSuccess = { controller.navigateTo(AppDestinations.Home)}
                     )
                 }
