@@ -15,7 +15,6 @@ import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.ui.Alignment
 import androidx.compose.foundation.clickable
-import com.example.festivalapp.data.festival.PlanZone
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
