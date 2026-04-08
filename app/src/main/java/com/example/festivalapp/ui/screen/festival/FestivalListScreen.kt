@@ -4,189 +4,91 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.Delete
-import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.festivalapp.data.festival.Festival
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Menu
+import androidx.compose.ui.Alignment
+import androidx.compose.foundation.clickable
+import com.example.festivalapp.data.festival.PlanZone
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun FestivalListScreen(
-    viewModel: FestivalViewModel
+    viewModel: FestivalViewModel = viewModel(),
+    onNavigateToCreate: () -> Unit,
+    onNavigateToFestivalDetail: (String) -> Unit,
+    onMenuClick: () -> Unit
 ) {
-    val uiState by viewModel.uiState.collectAsState()
-    
-    LaunchedEffect(Unit) {
-        viewModel.loadCurrentFestival()
-         viewModel.loadAllFestivals()
-    }
-    
+    val festivals by viewModel.festivals.collectAsState()
+    val isLoading by viewModel.isLoading.collectAsState()
+
     Scaffold(
+        topBar = {
+            TopAppBar(
+                title = { Text("Festivals") },
+                navigationIcon = {
+                    IconButton(onClick = onMenuClick) {
+                        Icon(Icons.Default.Menu, contentDescription = "Menu")
+                    }
+                }
+            )
+        },
         floatingActionButton = {
-            FloatingActionButton(
-                onClick = { viewModel.openForm() },
-                containerColor = MaterialTheme.colorScheme.primary
-            ) {
+            FloatingActionButton(onClick = onNavigateToCreate) {
                 Icon(Icons.Default.Add, contentDescription = "Créer un festival")
             }
         }
-    ) { paddingValues ->
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(paddingValues)
-        ) {
-            Text(
-                text = "Liste des Festivals",
-                fontSize = 28.sp,
-                fontWeight = FontWeight.Bold,
-                modifier = Modifier.padding(16.dp)
-            )
-            
-            if (uiState.successMessage != null) {
-                Card(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 16.dp)
-                        .padding(bottom = 16.dp),
-                    colors = CardDefaults.cardColors(containerColor = Color(0xFFD4EDDA))
-                ) {
-                    Text(
-                        text = uiState.successMessage!!,
-                        modifier = Modifier.padding(12.dp),
-                        color = Color(0xFF155724)
-                    )
-                }
+    ) { padding ->
+        if (isLoading) {
+            Box(Modifier.fillMaxSize().padding(padding), contentAlignment = Alignment.Center) {
+                CircularProgressIndicator()
             }
-            
-            if (uiState.error != null) {
-                Card(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 16.dp)
-                        .padding(bottom = 16.dp),
-                    colors = CardDefaults.cardColors(containerColor = Color(0xFFF8D7DA))
-                ) {
-                    Text(
-                        text = uiState.error!!,
-                        modifier = Modifier.padding(12.dp),
-                        color = Color(0xFF721C24)
+        } else {
+            LazyColumn(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(padding),
+                contentPadding = PaddingValues(16.dp),
+                verticalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                items(festivals) { festival ->
+                    FestivalItem(
+                        festival = festival,
+                        onClick = { onNavigateToFestivalDetail(festival.name) }
                     )
-                }
-            }
-            
-            if (uiState.isLoading && uiState.festivals.isEmpty()) {
-                CircularProgressIndicator(
-                    modifier = Modifier
-                        .align(Alignment.CenterHorizontally)
-                        .padding(32.dp)
-                )
-            } else if (uiState.festivals.isEmpty()) {
-                Text(
-                    text = "Aucun festival disponible",
-                    modifier = Modifier
-                        .align(Alignment.CenterHorizontally)
-                        .padding(32.dp)
-                )
-            } else {
-                LazyColumn(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 16.dp),
-                    verticalArrangement = Arrangement.spacedBy(12.dp),
-                    contentPadding = PaddingValues(8.dp)
-                ) {
-                    items(uiState.festivals) { festival ->
-                        FestivalCard(
-                            festival = festival,
-                            isCurrent = festival.name == uiState.currentFestival?.name,
-                            onEdit = { viewModel.openForm(festival) },
-                            onDelete = { viewModel.deleteFestival(festival.name) },
-                            onMakeCurrent = { viewModel.setCurrentFestival(festival.name) }
-                        )
-                    }
                 }
             }
         }
-    }
-    
-    if (uiState.showForm) {
-        FestivalFormDialog(
-            festival = uiState.selectedFestival,
-            isEditMode = uiState.isEditMode,
-            onDismiss = { viewModel.closeForm() },
-            onSave = { festival ->
-                if (uiState.isEditMode && uiState.selectedFestival != null) {
-                    viewModel.updateFestival(uiState.selectedFestival!!.name, festival)
-                } else {
-                    viewModel.createFestival(festival)
-                }
-            },
-            onCalculateRemaining = { viewModel.calculateRemainingTables(it) },
-            onPrepareFestival = { name, zones, begin, end ->
-                viewModel.prepareFestivalForSave(name, zones, begin, end)
-            }
-        )
     }
 }
 
 @Composable
-fun FestivalCard(
+fun FestivalItem(
     festival: Festival,
-    isCurrent: Boolean,
-    onEdit: () -> Unit,
-    onDelete: () -> Unit,
-    onMakeCurrent: () -> Unit
+    onClick: () -> Unit
 ) {
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            .then(if (isCurrent) Modifier.border(2.dp, MaterialTheme.colorScheme.primary) else Modifier),
-        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
+            .clickable(onClick = onClick)
     ) {
-        Column(modifier = Modifier.padding(12.dp)) {
+        Column(modifier = Modifier.padding(16.dp)) {
+            Text(festival.name, style = MaterialTheme.typography.titleLarge)
             Text(
-                text = festival.name,
-                fontWeight = FontWeight.Bold,
-                fontSize = 16.sp,
-                modifier = Modifier.padding(bottom = 8.dp)
+                "Du ${festival.beginDate ?: "?"} au ${festival.endDate ?: "?"}",
+                style = MaterialTheme.typography.bodyMedium
             )
-            if (isCurrent) {
-                AssistChip(
-                    onClick = {},
-                    label = { Text("Festival courant", fontSize = 10.sp) },
-                    modifier = Modifier.padding(bottom = 8.dp)
-                )
-            }
-            Text(text = "Petites tables: ${festival.nbSmallTables}", fontSize = 12.sp)
-            Text(text = "Grandes tables: ${festival.nbLargeTables}", fontSize = 12.sp)
-            Text(text = "Tables mairie: ${festival.nbCityHallTables}", fontSize = 12.sp)
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(top = 8.dp),
-                horizontalArrangement = Arrangement.spacedBy(4.dp)
-            ) {
-                IconButton(onClick = onEdit, modifier = Modifier.size(32.dp)) {
-                    Icon(Icons.Default.Edit, contentDescription = "Modifier", tint = MaterialTheme.colorScheme.primary)
-                }
-                IconButton(onClick = onDelete, modifier = Modifier.size(32.dp)) {
-                    Icon(Icons.Default.Delete, contentDescription = "Supprimer", tint = MaterialTheme.colorScheme.error)
-                }
-            }
-            if (!isCurrent) {
-                Button(onClick = onMakeCurrent, modifier = Modifier.fillMaxWidth().padding(top = 8.dp)) {
-                    Text("Courant")
-                }
-            }
+            HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))
+            Text(
+                "Tables: ${festival.nbSmallTables}p, ${festival.nbLargeTables}g, ${festival.nbCityHallTables}m",
+                style = MaterialTheme.typography.bodySmall
+            )
         }
     }
 }
