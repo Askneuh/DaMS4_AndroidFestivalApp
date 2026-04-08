@@ -10,6 +10,10 @@ import androidx.datastore.preferences.core.stringPreferencesKey
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.map
+import androidx.datastore.preferences.preferencesDataStore
+
+const val SESSION_PREFERENCE_NAME = "app_session"
+val Context.sessionDataStore by preferencesDataStore(name = SESSION_PREFERENCE_NAME)
 
 class SessionRepository(private val dataStore: DataStore<Preferences>) {
 

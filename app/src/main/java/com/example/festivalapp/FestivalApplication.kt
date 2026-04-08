@@ -8,19 +8,15 @@ import com.example.festivalapp.data.RetrofitInstance
 import com.example.festivalapp.data.auth.AuthRepository
 import com.example.festivalapp.data.session.DataStoreCookieJar
 import com.example.festivalapp.data.session.SessionRepository
+import com.example.festivalapp.data.session.sessionDataStore
 import okhttp3.OkHttpClient
 import java.security.KeyStore
-import java.security.SecureRandom
 import java.security.cert.CertificateFactory
 import java.util.concurrent.TimeUnit
-import javax.net.ssl.KeyManagerFactory
 import javax.net.ssl.SSLContext
 import javax.net.ssl.TrustManagerFactory
 import javax.net.ssl.X509TrustManager
 
-
-private const val SESSION_PREFERENCE_NAME = "app_session"
-private val Context.dataStore by preferencesDataStore(name = SESSION_PREFERENCE_NAME)
 
 class FestivalApplication : Application() {
     lateinit var sessionRepository: SessionRepository
@@ -30,7 +26,7 @@ class FestivalApplication : Application() {
 
     override fun onCreate() {
         super.onCreate()
-        sessionRepository = SessionRepository(dataStore)
+        sessionRepository = SessionRepository(sessionDataStore)
         cookieJar = DataStoreCookieJar(sessionRepository)
         val okHttpClient = generateSecureOkHttpClient()
         RetrofitInstance.okHttpClient = okHttpClient
