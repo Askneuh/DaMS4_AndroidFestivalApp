@@ -7,6 +7,7 @@ import androidx.lifecycle.viewmodel.viewModelFactory
 import com.example.festivalapp.ui.screen.admin.users.AdminUserListViewModel
 import com.example.festivalapp.ui.screen.login.LoginViewModel
 import com.example.festivalapp.ui.screen.reservation.ReservationListViewModel
+import com.example.festivalapp.ui.screen.festival.FestivalViewModel
 
 object AppViewModelProvider {
     val Factory = viewModelFactory {
@@ -19,10 +20,15 @@ object AppViewModelProvider {
             AdminUserListViewModel(userRepository = festivalApplication().container.userRepository)
         }
 
-        initializer { ReservationListViewModel(reservationRepository = festivalApplication().container.reservationRepository) }
+        initializer { 
+            ReservationListViewModel(reservationRepository = festivalApplication().container.reservationRepository) 
+        }
+
+        initializer {
+            FestivalViewModel(festivalRepository = festivalApplication().container.festivalRepository)
+        }
     }
 }
 
-// Petite fonction magique pour ne pas répéter "récupère moi l'application" partout (Typique des tutoriels Google)
 fun CreationExtras.festivalApplication(): FestivalApplication =
     (this[AndroidViewModelFactory.APPLICATION_KEY] as FestivalApplication)
