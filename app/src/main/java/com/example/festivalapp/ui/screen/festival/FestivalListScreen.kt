@@ -24,8 +24,9 @@ fun FestivalListScreen(
     onNavigateToFestivalDetail: (String) -> Unit,
     onMenuClick: () -> Unit
 ) {
-    val festivals by viewModel.festivals.collectAsState()
-    val isLoading by viewModel.isLoading.collectAsState()
+    val uiState by viewModel.uiState.collectAsState()
+    val festivals = uiState.festivals
+    val isLoading = uiState.isLoading
 
     Scaffold(
         topBar = {

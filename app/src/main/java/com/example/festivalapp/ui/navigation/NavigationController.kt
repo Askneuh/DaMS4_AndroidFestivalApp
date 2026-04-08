@@ -16,28 +16,28 @@ class NavigationController(
 ) {
 
     fun navigateTo(destination: AppDestinations) {
-        model.backStack.add(destination)
+        model.navigate(destination)
         closeDrawer()
     }
 
     fun navigateBack() {
         if (model.backStack.size > 1) {
-            model.backStack.removeAt(model.backStack.lastIndex)
+            model.navigateUp()
         }
     }
 
     fun setTheme(mode: ThemeMode) {
-        model.themeMode.value = mode
+        model.setThemeMode(mode)
         scope.launch {
             userPreferences.saveTheme(mode)
         }
     }
 
     fun toggleDrawer() {
-        model.isDrawerOpen.value = !model.isDrawerOpen.value
+        model.toggleDrawer()
     }
 
     fun closeDrawer() {
-        model.isDrawerOpen.value = false
+        model.closeDrawer()
     }
 }

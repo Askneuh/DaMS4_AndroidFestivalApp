@@ -50,8 +50,8 @@ fun AppNavigation(
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
 
     // Sync drawer state from model to UI
-    LaunchedEffect(model.isDrawerOpen.value) {
-        if (model.isDrawerOpen.value) {
+    LaunchedEffect(model.isDrawerOpen()) {
+        if (model.isDrawerOpen()) {
             drawerState.open()
         } else {
             drawerState.close()
@@ -60,7 +60,7 @@ fun AppNavigation(
 
     // Sync UI drawer state back to model (when swiped closed)
     LaunchedEffect(drawerState.currentValue) {
-        if (drawerState.isClosed && model.isDrawerOpen.value) {
+        if (drawerState.isClosed && model.isDrawerOpen()) {
             controller.closeDrawer()
         }
     }
@@ -123,7 +123,7 @@ fun AppNavigation(
                 }
                 is AppDestinations.Settings -> NavEntry(key) {
                     SettingsScreen(
-                        currentTheme = model.themeMode.value,
+                        currentTheme = model.themeMode,
                         onThemeChanged = { controller.setTheme(it) },
                         onNavigateBack = { controller.navigateBack() }
                     )
@@ -140,7 +140,7 @@ fun AppNavigation(
                     FestivalListScreen(
                         viewModel = viewModel(factory = AppViewModelProvider.Factory),
                         onNavigateToCreate = { controller.navigateTo(AppDestinations.FestivalCreate()) },
-                        onNavigateToFestivalDetail = { id -> controller.navigateTo(AppDestinations.FestivalCreate(id)) },
+                        onNavigateToFestivalDetail = { id -> controller.navigateTo(AppDestinations.FestivalCreate(id.toInt())) },
                         onMenuClick = { controller.toggleDrawer() }
                     )
                 }

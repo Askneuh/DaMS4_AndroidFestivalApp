@@ -35,7 +35,7 @@ class MainActivity : ComponentActivity() {
                 ) 
             }
 
-            val themeMode by navigationModel.themeMode.collectAsState()
+            val themeMode = navigationModel.themeMode
             val darkTheme = when (themeMode) {
                 ThemeMode.Light -> false
                 ThemeMode.Dark -> true
