@@ -97,7 +97,19 @@ fun EditorDetailScreen(
                         viewModel.deleteGame(id)
                     }
                 )
-                1 -> ContactsTabContent(contacts = contacts, isLoading = networkState is EditorDetailUiState.Loading)
+                1 -> ContactsTabContent(
+                    contacts = contacts,
+                    isLoading = networkState is EditorDetailUiState.Loading,
+                    onAddContact = { name, email, phone, role, priority ->
+                        viewModel.addContact(name, email, phone, role, priority)
+                    },
+                    onUpdateContact = { id, name, email, phone, role, priority ->
+                        viewModel.updateContact(id, name, email, phone, role, priority)
+                    },
+                    onDeleteContact = { id ->
+                        viewModel.deleteContact(id)
+                    }
+                )
             }
         }
     }
@@ -311,27 +323,184 @@ fun GameDialog(
 }
 
 @Composable
-fun ContactsTabContent(contacts: List<Contact>, isLoading: Boolean) {
-    LazyColumn(
-        modifier = Modifier.fillMaxSize(),
-        contentPadding = PaddingValues(16.dp),
-        verticalArrangement = Arrangement.spacedBy(8.dp)
-    ) {
-        if (contacts.isEmpty() && !isLoading) {
-            item {
-                Box(
-                    modifier = Modifier.fillMaxWidth().padding(vertical = 32.dp),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Text("Aucun contact enregistré pour cet éditeur.", color = MaterialTheme.colorScheme.onSurfaceVariant)
+fun ContactsTabContent(
+    contacts: List<Contact>,
+    isLoading: Boolean,
+    onAddContact: (name: String, email: String, phone: String?, role: String?, priority: Boolean) -> Unit,
+    onUpdateContact: (id: Int, name: String, email: String, phone: String?, role: String?, priority: Boolean) -> Unit,
+    onDeleteContact: (id: Int) -> Unit
+) {
+    var showContactDialog by remember { mutableStateOf(false) }
+    var contactToEdit by remember { mutableStateOf<Contact?>(null) }
+    
+    var showDeleteDialog by remember { mutableStateOf(false) }
+    var contactToDelete by remember { mutableStateOf<Contact?>(null) }
+
+    Box(modifier = Modifier.fillMaxSize()) {
+        LazyColumn(
+            modifier = Modifier.fillMaxSize(),
+            contentPadding = PaddingValues(16.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            if (contacts.isEmpty() && !isLoading) {
+                item {
+                    Box(
+                        modifier = Modifier.fillMaxWidth().padding(vertical = 32.dp),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text("Aucun contact enregistré pour cet éditeur.", color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    }
+                }
+            } else {
+                items(contacts, key = { it.id }) { contact ->
+                    ContactCard(
+                        contact = contact,
+                        onEdit = { 
+                            contactToEdit = contact
+                            showContactDialog = true 
+                        },
+                        onDelete = {
+                            contactToDelete = contact
+                            showDeleteDialog = true
+                        }
+                    )
                 }
             }
-        } else {
-            items(contacts, key = { it.id }) { contact ->
-                ContactCard(contact = contact)
-            }
+        }
+
+        FloatingActionButton(
+            onClick = { 
+                contactToEdit = null
+                showContactDialog = true 
+            },
+            modifier = Modifier
+                .align(Alignment.BottomEnd)
+                .padding(16.dp)
+        ) {
+            Icon(Icons.Default.Add, contentDescription = "Ajouter un contact")
         }
     }
+
+    if (showContactDialog) {
+        ContactDialog(
+            initialContact = contactToEdit,
+            onDismiss = { 
+                showContactDialog = false 
+                contactToEdit = null
+            },
+            onConfirm = { name, email, phone, role, priority ->
+                if (contactToEdit == null) {
+                    onAddContact(name, email, phone, role, priority)
+                } else {
+                    onUpdateContact(contactToEdit!!.id, name, email, phone, role, priority)
+                }
+                showContactDialog = false
+                contactToEdit = null
+            }
+        )
+    }
+
+    if (showDeleteDialog && contactToDelete != null) {
+        AlertDialog(
+            onDismissRequest = { 
+                showDeleteDialog = false 
+                contactToDelete = null
+            },
+            title = { Text("Supprimer un contact") },
+            text = { Text("Voulez-vous vraiment supprimer le contact \"${contactToDelete?.name}\" ?") },
+            confirmButton = {
+                Button(
+                    onClick = {
+                        contactToDelete?.let { onDeleteContact(it.id) }
+                        showDeleteDialog = false
+                        contactToDelete = null
+                    },
+                    colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.error)
+                ) {
+                    Text("Supprimer")
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { 
+                    showDeleteDialog = false 
+                    contactToDelete = null
+                }) {
+                    Text("Annuler")
+                }
+            }
+        )
+    }
+}
+
+@Composable
+fun ContactDialog(
+    initialContact: Contact?,
+    onDismiss: () -> Unit,
+    onConfirm: (name: String, email: String, phone: String?, role: String?, priority: Boolean) -> Unit
+) {
+    var name by remember { mutableStateOf(initialContact?.name ?: "") }
+    var email by remember { mutableStateOf(initialContact?.email ?: "") }
+    var phone by remember { mutableStateOf(initialContact?.phone ?: "") }
+    var role by remember { mutableStateOf(initialContact?.role ?: "") }
+    var priority by remember { mutableStateOf(initialContact?.priority ?: false) }
+
+    val isEditing = initialContact != null
+
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text(if (isEditing) "Modifier un contact" else "Ajouter un contact") },
+        text = {
+            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                OutlinedTextField(
+                    value = name,
+                    onValueChange = { name = it },
+                    label = { Text("Nom *") },
+                    modifier = Modifier.fillMaxWidth(),
+                    singleLine = true
+                )
+                OutlinedTextField(
+                    value = email,
+                    onValueChange = { email = it },
+                    label = { Text("Email *") },
+                    modifier = Modifier.fillMaxWidth(),
+                    singleLine = true,
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email)
+                )
+                OutlinedTextField(
+                    value = phone,
+                    onValueChange = { phone = it },
+                    label = { Text("Téléphone") },
+                    modifier = Modifier.fillMaxWidth(),
+                    singleLine = true,
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Phone)
+                )
+                OutlinedTextField(
+                    value = role,
+                    onValueChange = { role = it },
+                    label = { Text("Rôle") },
+                    modifier = Modifier.fillMaxWidth(),
+                    singleLine = true
+                )
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Checkbox(checked = priority, onCheckedChange = { priority = it })
+                    Text("Contact prioritaire")
+                }
+            }
+        },
+        confirmButton = {
+            Button(
+                onClick = { onConfirm(name, email, phone, role, priority) },
+                enabled = name.isNotBlank() && email.isNotBlank()
+            ) {
+                Text(if (isEditing) "Modifier" else "Ajouter")
+            }
+        },
+        dismissButton = {
+            TextButton(onClick = onDismiss) {
+                Text("Annuler")
+            }
+        }
+    )
 }
 
 @Composable
@@ -368,24 +537,38 @@ fun GameCard(
 }
 
 @Composable
-fun ContactCard(contact: Contact) {
+fun ContactCard(
+    contact: Contact,
+    onEdit: () -> Unit,
+    onDelete: () -> Unit
+) {
     Card(
         modifier = Modifier.fillMaxWidth(),
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.secondaryContainer)
     ) {
-        Column(modifier = Modifier.padding(16.dp)) {
-            Text(text = contact.name, fontWeight = FontWeight.Bold, style = MaterialTheme.typography.titleMedium)
-            if (!contact.role.isNullOrBlank()) {
-                Text(text = contact.role ?: "", style = MaterialTheme.typography.labelSmall)
+        Row(modifier = Modifier.padding(16.dp), verticalAlignment = Alignment.CenterVertically) {
+            Column(modifier = Modifier.weight(1f)) {
+                Text(text = contact.name, fontWeight = FontWeight.Bold, style = MaterialTheme.typography.titleMedium)
+                if (!contact.role.isNullOrBlank()) {
+                    Text(text = contact.role ?: "", style = MaterialTheme.typography.labelSmall)
+                }
+                Spacer(modifier = Modifier.height(4.dp))
+                Text(text = "Email: ${contact.email}", style = MaterialTheme.typography.bodySmall)
+                if (!contact.phone.isNullOrBlank()) {
+                    Text(text = "Tél: ${contact.phone}", style = MaterialTheme.typography.bodySmall)
+                }
+                if (contact.priority) {
+                    Badge(containerColor = MaterialTheme.colorScheme.error) {
+                        Text("Prioritaire", modifier = Modifier.padding(horizontal = 4.dp))
+                    }
+                }
             }
-            Spacer(modifier = Modifier.height(4.dp))
-            Text(text = "Email: ${contact.email}", style = MaterialTheme.typography.bodySmall)
-            if (!contact.phone.isNullOrBlank()) {
-                Text(text = "Tél: ${contact.phone}", style = MaterialTheme.typography.bodySmall)
-            }
-            if (contact.priority) {
-                Badge(containerColor = MaterialTheme.colorScheme.error) {
-                    Text("Prioritaire", modifier = Modifier.padding(horizontal = 4.dp))
+            Row {
+                IconButton(onClick = onEdit) {
+                    Icon(Icons.Default.Edit, contentDescription = "Modifier", tint = MaterialTheme.colorScheme.primary)
+                }
+                IconButton(onClick = onDelete) {
+                    Icon(Icons.Default.Delete, contentDescription = "Supprimer", tint = MaterialTheme.colorScheme.error)
                 }
             }
         }

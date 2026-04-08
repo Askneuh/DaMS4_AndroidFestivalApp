@@ -23,8 +23,8 @@ interface EditorApiService {
     @GET("games/byEditor/{idEditor}")
     suspend fun getGamesByEditor(@Path("idEditor") idEditor: Int): List<GameDto>
 
-    // GET /contacts/editor/{editorId} → les contacts d'un éditeur
-    @GET("contacts/editor/{editorId}")
+    // GET /contact/editor/{editorId} → les contacts d'un éditeur
+    @GET("contact/editor/{editorId}")
     suspend fun getContactsByEditor(@Path("editorId") editorId: Int): List<ContactDto>
 
     // POST /games → créer un jeu
@@ -38,6 +38,18 @@ interface EditorApiService {
     // DELETE /games/{gameId} → supprimer un jeu
     @DELETE("games/{gameId}")
     suspend fun deleteGame(@Path("gameId") gameId: Int): GeneralResponse
+
+    // POST /contact → créer un contact
+    @POST("contact")
+    suspend fun createContact(@Body request: CreateContactRequest): CreateContactResponse
+
+    // POST /contact/update/{contactId} → mettre à jour un contact
+    @POST("contact/update/{contactId}")
+    suspend fun updateContact(@Path("contactId") contactId: Int, @Body request: CreateContactRequest): GeneralResponse
+
+    // DELETE /contact/{contactId} → supprimer un contact
+    @DELETE("contact/{contactId}")
+    suspend fun deleteContact(@Path("contactId") contactId: Int): GeneralResponse
 }
 
 @Serializable
@@ -68,4 +80,20 @@ data class CreateGameResponse(
 @Serializable
 data class GeneralResponse(
     val message: String
+)
+
+@Serializable
+data class CreateContactRequest(
+    val name: String,
+    val email: String,
+    val idEditor: Int,
+    val phone: String? = null,
+    val role: String? = null,
+    val priority: Boolean = false
+)
+
+@Serializable
+data class CreateContactResponse(
+    val message: String,
+    val id: Int
 )

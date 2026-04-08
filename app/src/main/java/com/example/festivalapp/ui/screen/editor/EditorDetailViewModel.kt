@@ -5,6 +5,7 @@ import androidx.lifecycle.viewModelScope
 import com.example.festivalapp.data.contact.room.Contact
 import com.example.festivalapp.data.editor.room.EditorRepository
 import com.example.festivalapp.data.editor.room.Editor
+import com.example.festivalapp.data.editor.retrofit.CreateContactRequest
 import com.example.festivalapp.data.editor.retrofit.CreateGameRequest
 import com.example.festivalapp.data.game.room.Game
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -88,6 +89,14 @@ class EditorDetailViewModel(
                 )
                 editorRepository.addGame(request)
                 _networkState.value = EditorDetailUiState.Success
+            } catch (e: retrofit2.HttpException) {
+                val errorMsg = try {
+                    val jsonObj = org.json.JSONObject(e.response()?.errorBody()?.string() ?: "")
+                    jsonObj.getString("error")
+                } catch (ex: Exception) {
+                    e.message()
+                }
+                _networkState.value = EditorDetailUiState.Error("Ajout refusé: $errorMsg")
             } catch (e: Exception) {
                 _networkState.value = EditorDetailUiState.Error("Erreur lors de l'ajout: ${e.message}")
             }
@@ -118,6 +127,14 @@ class EditorDetailViewModel(
                 )
                 editorRepository.updateGame(gameId, request)
                 _networkState.value = EditorDetailUiState.Success
+            } catch (e: retrofit2.HttpException) {
+                val errorMsg = try {
+                    val jsonObj = org.json.JSONObject(e.response()?.errorBody()?.string() ?: "")
+                    jsonObj.getString("error")
+                } catch (ex: Exception) {
+                    e.message()
+                }
+                _networkState.value = EditorDetailUiState.Error("Modification refusée: $errorMsg")
             } catch (e: Exception) {
                 _networkState.value = EditorDetailUiState.Error("Erreur lors de la modification: ${e.message}")
             }
@@ -131,6 +148,84 @@ class EditorDetailViewModel(
                 _networkState.value = EditorDetailUiState.Success
             } catch (e: Exception) {
                 _networkState.value = EditorDetailUiState.Error("Erreur lors de la suppression: ${e.message}")
+            }
+        }
+    }
+
+    fun addContact(
+        name: String,
+        email: String,
+        phone: String?,
+        role: String?,
+        priority: Boolean
+    ) {
+        viewModelScope.launch {
+            try {
+                val request = CreateContactRequest(
+                    name = name,
+                    email = email,
+                    idEditor = editorId,
+                    phone = phone?.takeIf { it.isNotBlank() },
+                    role = role?.takeIf { it.isNotBlank() },
+                    priority = priority
+                )
+                editorRepository.addContact(request)
+                _networkState.value = EditorDetailUiState.Success
+            } catch (e: retrofit2.HttpException) {
+                val errorMsg = try {
+                    val jsonObj = org.json.JSONObject(e.response()?.errorBody()?.string() ?: "")
+                    jsonObj.getString("error")
+                } catch (ex: Exception) {
+                    e.message()
+                }
+                _networkState.value = EditorDetailUiState.Error("Ajout refusé: $errorMsg")
+            } catch (e: Exception) {
+                _networkState.value = EditorDetailUiState.Error("Erreur lors de l'ajout: ${e.message}")
+            }
+        }
+    }
+
+    fun updateContact(
+        contactId: Int,
+        name: String,
+        email: String,
+        phone: String?,
+        role: String?,
+        priority: Boolean
+    ) {
+        viewModelScope.launch {
+            try {
+                val request = CreateContactRequest(
+                    name = name,
+                    email = email,
+                    idEditor = editorId,
+                    phone = phone?.takeIf { it.isNotBlank() },
+                    role = role?.takeIf { it.isNotBlank() },
+                    priority = priority
+                )
+                editorRepository.updateContact(contactId, request)
+                _networkState.value = EditorDetailUiState.Success
+            } catch (e: retrofit2.HttpException) {
+                val errorMsg = try {
+                    val jsonObj = org.json.JSONObject(e.response()?.errorBody()?.string() ?: "")
+                    jsonObj.getString("error")
+                } catch (ex: Exception) {
+                    e.message()
+                }
+                _networkState.value = EditorDetailUiState.Error("Modification refusée: $errorMsg")
+            } catch (e: Exception) {
+                _networkState.value = EditorDetailUiState.Error("Erreur lors de la modification: ${e.message}")
+            }
+        }
+    }
+
+    fun deleteContact(contactId: Int) {
+        viewModelScope.launch {
+            try {
+                editorRepository.deleteContact(contactId, editorId)
+                _networkState.value = EditorDetailUiState.Success
+            } catch (e: Exception) {
+                _networkState.value = EditorDetailUiState.Error("Erreur lors de la suppression du contact: ${e.message}")
             }
         }
     }

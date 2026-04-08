@@ -8,6 +8,7 @@ import com.example.festivalapp.data.game.room.GameDAO
 import kotlinx.coroutines.flow.Flow
 import retrofit2.HttpException
 
+import com.example.festivalapp.data.editor.retrofit.CreateContactRequest
 import com.example.festivalapp.data.editor.retrofit.CreateGameRequest
 
 class EditorRepository(
@@ -75,5 +76,21 @@ class EditorRepository(
         // Optionnel : on peut supprimer localement pour être plus rapide, ou juste rafraîchir
         gameDAO.deleteGameById(gameId)
         refreshGamesForEditor(editorId)
+    }
+
+    suspend fun addContact(request: CreateContactRequest) {
+        api.createContact(request)
+        refreshContactsForEditor(request.idEditor)
+    }
+
+    suspend fun updateContact(contactId: Int, request: CreateContactRequest) {
+        api.updateContact(contactId, request)
+        refreshContactsForEditor(request.idEditor)
+    }
+
+    suspend fun deleteContact(contactId: Int, editorId: Int) {
+        api.deleteContact(contactId)
+        contactDAO.deleteContactById(contactId)
+        refreshContactsForEditor(editorId)
     }
 }

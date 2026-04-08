@@ -13,4 +13,7 @@ interface ContactDAO {
 
     @Query("SELECT * FROM contacts WHERE idEditor = :editorId ORDER BY name")
     fun getContactsByEditor(editorId: Int): Flow<List<Contact>>
+
+    @Query("DELETE FROM contacts WHERE id = :contactId")
+    suspend fun deleteContactById(contactId: Int)
 }
