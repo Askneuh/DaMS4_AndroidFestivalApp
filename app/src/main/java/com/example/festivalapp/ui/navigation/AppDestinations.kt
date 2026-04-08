@@ -7,7 +7,7 @@ sealed class AppDestinations(val isPublic: Boolean = false) {
 
     // Festival Management
     data object FestivalList : AppDestinations()
-    data class FestivalCreate(val festivalId: Int? = null) : AppDestinations()
+    data class FestivalCreate(val festivalId: String? = null) : AppDestinations()
 
     // Publisher Management
     data object PublisherList : AppDestinations()

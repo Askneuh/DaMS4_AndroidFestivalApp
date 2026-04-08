@@ -9,7 +9,7 @@ import androidx.compose.ui.unit.dp
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun FestivalCreateScreen(
-    festivalId: Int? = null,
+    festivalId: String? = null,
     onNavigateBack: () -> Unit
 ) {
     Scaffold(
