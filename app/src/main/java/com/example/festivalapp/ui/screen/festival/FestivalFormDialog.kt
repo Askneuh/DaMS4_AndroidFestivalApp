@@ -103,7 +103,7 @@ fun FestivalFormDialog(
                     Icon(Icons.Default.Add, contentDescription = null, modifier = Modifier.padding(end = 4.dp))
                     Text("Ajouter une zone")
                 }
-                Divider(modifier = Modifier.padding(vertical = 12.dp))
+                HorizontalDivider(modifier = Modifier.padding(vertical = 12.dp))
                 Text(
                     text = "Zones du Plan (Géographique)",
                     style = MaterialTheme.typography.titleMedium,
