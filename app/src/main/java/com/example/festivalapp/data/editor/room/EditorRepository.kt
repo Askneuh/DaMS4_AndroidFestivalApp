@@ -8,6 +8,8 @@ import com.example.festivalapp.data.game.room.GameDAO
 import kotlinx.coroutines.flow.Flow
 import retrofit2.HttpException
 
+import com.example.festivalapp.data.editor.retrofit.CreateGameRequest
+
 class EditorRepository(
     private val editorDAO: EditorDAO,
     private val gameDAO: GameDAO,
@@ -56,4 +58,22 @@ class EditorRepository(
             throw e
         }
     }
-}
+
+    suspend fun addGame(request: CreateGameRequest) {
+        api.createGame(request)
+        // Rafraîchir la liste des jeux locaux depuis l'API
+        refreshGamesForEditor(request.idEditor)
+    }
+
+    suspend fun updateGame(gameId: Int, request: CreateGameRequest) {
+        api.updateGame(gameId, request)
+        refreshGamesForEditor(request.idEditor)
+    }
+
+    suspend fun deleteGame(gameId: Int, editorId: Int) {
+        api.deleteGame(gameId)
+        // Optionnel : on peut supprimer localement pour être plus rapide, ou juste rafraîchir
+        gameDAO.deleteGameById(gameId)
+        refreshGamesForEditor(editorId)
+    }
+}

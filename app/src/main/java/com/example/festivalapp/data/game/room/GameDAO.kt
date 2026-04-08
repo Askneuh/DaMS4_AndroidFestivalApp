@@ -13,4 +13,7 @@ interface GameDAO {
 
     @Query("SELECT * FROM games WHERE idEditor = :editorId ORDER BY name")
     fun getGamesByEditor(editorId: Int): Flow<List<Game>>
+
+    @Query("DELETE FROM games WHERE id = :gameId")
+    suspend fun deleteGameById(gameId: Int)
 }

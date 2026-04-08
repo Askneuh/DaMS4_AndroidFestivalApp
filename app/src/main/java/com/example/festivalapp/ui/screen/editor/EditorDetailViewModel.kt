@@ -5,6 +5,7 @@ import androidx.lifecycle.viewModelScope
 import com.example.festivalapp.data.contact.room.Contact
 import com.example.festivalapp.data.editor.room.EditorRepository
 import com.example.festivalapp.data.editor.room.Editor
+import com.example.festivalapp.data.editor.retrofit.CreateGameRequest
 import com.example.festivalapp.data.game.room.Game
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -63,4 +64,75 @@ class EditorDetailViewModel(
             }
         }
     }
+
+    fun addGame(
+        name: String,
+        author: String,
+        nbMinPlayer: Int,
+        nbMaxPlayer: Int,
+        minimumAge: Int,
+        duration: Int
+    ) {
+        viewModelScope.launch {
+            try {
+                val request = CreateGameRequest(
+                    name = name,
+                    author = author,
+                    nbMinPlayer = nbMinPlayer,
+                    nbMaxPlayer = nbMaxPlayer,
+                    minimumAge = minimumAge,
+                    duration = duration,
+                    idEditor = editorId,
+                    idGameType = 1,
+                    prototype = false
+                )
+                editorRepository.addGame(request)
+                _networkState.value = EditorDetailUiState.Success
+            } catch (e: Exception) {
+                _networkState.value = EditorDetailUiState.Error("Erreur lors de l'ajout: ${e.message}")
+            }
+        }
+    }
+
+    fun updateGame(
+        gameId: Int,
+        name: String,
+        author: String,
+        nbMinPlayer: Int,
+        nbMaxPlayer: Int,
+        minimumAge: Int,
+        duration: Int
+    ) {
+        viewModelScope.launch {
+            try {
+                val request = CreateGameRequest(
+                    name = name,
+                    author = author,
+                    nbMinPlayer = nbMinPlayer,
+                    nbMaxPlayer = nbMaxPlayer,
+                    minimumAge = minimumAge,
+                    duration = duration,
+                    idEditor = editorId,
+                    idGameType = 1,
+                    prototype = false
+                )
+                editorRepository.updateGame(gameId, request)
+                _networkState.value = EditorDetailUiState.Success
+            } catch (e: Exception) {
+                _networkState.value = EditorDetailUiState.Error("Erreur lors de la modification: ${e.message}")
+            }
+        }
+    }
+
+    fun deleteGame(gameId: Int) {
+        viewModelScope.launch {
+            try {
+                editorRepository.deleteGame(gameId, editorId)
+                _networkState.value = EditorDetailUiState.Success
+            } catch (e: Exception) {
+                _networkState.value = EditorDetailUiState.Error("Erreur lors de la suppression: ${e.message}")
+            }
+        }
+    }
 }
+
