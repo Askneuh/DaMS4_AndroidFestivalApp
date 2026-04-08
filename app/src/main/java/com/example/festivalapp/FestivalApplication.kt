@@ -13,6 +13,7 @@ import com.example.festivalapp.data.session.DataStoreCookieJar
 import com.example.festivalapp.data.session.SessionRepository
 import com.example.festivalapp.data.user.room.DefaultUserRepository
 import com.example.festivalapp.data.user.room.UserRepository
+import com.example.festivalapp.data.session.sessionDataStore
 import okhttp3.OkHttpClient
 import java.security.KeyStore
 import java.security.cert.CertificateFactory

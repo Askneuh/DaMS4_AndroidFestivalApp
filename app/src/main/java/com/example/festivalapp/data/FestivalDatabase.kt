@@ -1,41 +1,38 @@
 package com.example.festivalapp.data
 
 import android.content.Context
-import androidx.room.Database
-import androidx.room.Room
-import androidx.room.RoomDatabase
-import com.example.festivalapp.data.editor.room.Editor
-import com.example.festivalapp.data.editor.room.EditorDAO
-import com.example.festivalapp.data.festival.FestivalDao
-import com.example.festivalapp.data.festival.FestivalEntity
-import com.example.festivalapp.data.festival.TariffZoneDao
-import com.example.festivalapp.data.festival.TariffZoneEntity
-import com.example.festivalapp.data.reservation.room.Reservation
-import com.example.festivalapp.data.reservation.room.ReservationDAO
-import com.example.festivalapp.data.user.room.User
-import com.example.festivalapp.data.user.room.UserDAO
+import androidx.room.*
+import com.example.festivalapp.data.editor.room.*
+import com.example.festivalapp.data.festival.*
+import com.example.festivalapp.data.reservation.room.*
+import com.example.festivalapp.data.user.room.*
+import com.example.festivalapp.data.publisher.room.*
+import com.example.festivalapp.data.festival.room.FestivalGameEntity
 
 @Database(
     entities = [
-        FestivalEntity::class,
+        User::class, 
+        FestivalEntity::class, 
         TariffZoneEntity::class,
-        User::class,
-        Editor::class,
-        Reservation::class
-    ],
-    version = 3, 
+        PublisherEntity::class, 
+        GameEntity::class, 
+        FestivalGameEntity::class,
+        Reservation::class,
+        Editor::class
+    ], 
+    version = 2, 
     exportSchema = false
 )
-abstract class FestivalDatabase : RoomDatabase() {
+abstract class FestivalDatabase: RoomDatabase() {
 
-    // === Tes DAO ===
+    // DAOs
     abstract fun festivalDao(): FestivalDao
     abstract fun tariffZoneDao(): TariffZoneDao
-    
-    // === Les DAO de l'équipe ===
     abstract fun userDAO(): UserDAO
-    abstract fun editorDAO(): EditorDAO
+    abstract fun publisherDAO(): PublisherDAO
+    abstract fun gameDAO(): GameDAO
     abstract fun reservationDAO(): ReservationDAO
+    abstract fun editorDAO(): EditorDAO
 
     companion object {
         @Volatile
@@ -48,8 +45,8 @@ abstract class FestivalDatabase : RoomDatabase() {
                     FestivalDatabase::class.java,
                     "festival_database"
                 )
-                    .fallbackToDestructiveMigration()
-                    .build()
+                .fallbackToDestructiveMigration()
+                .build()
                 INSTANCE = instance
                 instance
             }
