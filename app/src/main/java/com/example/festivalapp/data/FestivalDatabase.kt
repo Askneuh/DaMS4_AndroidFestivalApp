@@ -30,7 +30,7 @@ import com.example.festivalapp.data.user.room.UserDAO
         Editor::class,
         PlanZoneEntity::class
     ],
-    version = 4,
+    version = 3, 
     exportSchema = false
 )
 abstract class FestivalDatabase: RoomDatabase() {

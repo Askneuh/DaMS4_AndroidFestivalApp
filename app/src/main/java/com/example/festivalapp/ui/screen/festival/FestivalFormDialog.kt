@@ -133,7 +133,7 @@ fun FestivalFormDialog(
                     Icon(Icons.Default.Add, contentDescription = null)
                     Text("Ajouter une zone plan")
                 }
-                
+
                 if (errorMessage != null) {
                     Text(
                         text = errorMessage!!,
@@ -176,7 +176,7 @@ fun FestivalFormDialog(
                         festivalName, 
                         zones, 
                         planZones,
-                        beginDate.ifBlank { null }, 
+                        beginDate.ifBlank { null },
                         endDate.ifBlank { null }
                     )
                     onSave(prepared)
@@ -321,9 +321,9 @@ fun PlanZoneFormField(
                 modifier = Modifier.fillMaxWidth()
             )
             Spacer(modifier = Modifier.height(8.dp))
-            
+
             Text("Zone tarifaire liée :", style = MaterialTheme.typography.bodySmall)
-            
+
             // On utilise une Row avec un scroll horizontal simple, ou pas de scroll si peu d'éléments
             Row(
                 modifier = Modifier

@@ -8,5 +8,5 @@ data class PlanZone(
     val name: String = "",
     val nbTables: Int = 0,
     val festivalName: String = "",
-    val tariffZoneId: Int = 0
+    val tariffZoneId: Int = 0 // Référence à l'ID de la zone tarifaire
 )

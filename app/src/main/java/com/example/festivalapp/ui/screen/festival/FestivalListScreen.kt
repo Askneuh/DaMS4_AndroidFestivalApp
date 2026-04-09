@@ -1,9 +1,11 @@
 package com.example.festivalapp.ui.screen.festival
 
 import androidx.compose.foundation.border
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Delete
@@ -15,6 +17,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.festivalapp.data.festival.Festival
 import androidx.compose.material.icons.filled.Menu
+import androidx.compose.material.icons.filled.Place
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
@@ -122,7 +125,8 @@ fun FestivalListScreen(
                             isCurrent = festival.name == uiState.currentFestival?.name,
                             onEdit = { viewModel.openForm(festival) },
                             onDelete = { viewModel.deleteFestival(festival.name) },
-                            onMakeCurrent = { viewModel.setCurrentFestival(festival.name) }
+                            onMakeCurrent = { viewModel.setCurrentFestival(festival.name) },
+                            onClick = { onNavigateToFestivalDetail(festival.name) }
                         )
                     }
                 }
@@ -156,71 +160,97 @@ fun FestivalItem(
     isCurrent: Boolean,
     onEdit: () -> Unit,
     onDelete: () -> Unit,
-    onMakeCurrent: () -> Unit
+    onMakeCurrent: () -> Unit,
+    onClick: () -> Unit
 ) {
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            .then(if (isCurrent) Modifier.border(2.dp, MaterialTheme.colorScheme.primary) else Modifier),
-        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
+            .then(if (isCurrent) Modifier.border(2.dp, MaterialTheme.colorScheme.primary, MaterialTheme.shapes.medium) else Modifier),
+        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
+        onClick = onClick
     ) {
-        Column(modifier = Modifier.padding(12.dp)) {
-            Text(
-                text = festival.name,
-                fontWeight = FontWeight.Bold,
-                fontSize = 16.sp,
-                modifier = Modifier.padding(bottom = 8.dp)
-            )
-            if (isCurrent) {
-                AssistChip(
-                    onClick = {},
-                    label = { Text("Festival courant", fontSize = 10.sp) },
-                    modifier = Modifier.padding(bottom = 8.dp)
+        Column(modifier = Modifier.padding(16.dp)) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    text = festival.name,
+                    style = MaterialTheme.typography.titleLarge,
+                    fontWeight = FontWeight.Bold
                 )
+                if (isCurrent) {
+                    SuggestionChip(
+                        onClick = {},
+                        label = { Text("Courant", fontSize = 10.sp) },
+                        colors = SuggestionChipDefaults.suggestionChipColors(containerColor = MaterialTheme.colorScheme.primaryContainer)
+                    )
+                }
             }
-            Text(text = "Petites tables: ${festival.nbSmallTables}", fontSize = 12.sp)
-            Text(text = "Grandes tables: ${festival.nbLargeTables}", fontSize = 12.sp)
-            Text(text = "Tables mairie: ${festival.nbCityHallTables}", fontSize = 12.sp)
+
+            Spacer(Modifier.height(8.dp))
+
+            Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(16.dp)) {
+                Column {
+                    Text(text = "Tables", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.secondary)
+                    Text(text = "${festival.nbSmallTables}p / ${festival.nbLargeTables}g / ${festival.nbCityHallTables}m", style = MaterialTheme.typography.bodyMedium)
+                }
+            }
 
             if (festival.tariffZones.isNotEmpty()) {
-                HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))
-                Text(
-                    text = "Zones (${festival.tariffZones.size}) :",
-                    fontWeight = FontWeight.Bold,
-                    fontSize = 12.sp,
-                    modifier = Modifier.padding(bottom = 4.dp)
-                )
-                festival.tariffZones.forEach { zone ->
-                    Row(
-                        modifier = Modifier.fillMaxWidth().padding(bottom = 2.dp),
-                        horizontalArrangement = Arrangement.SpaceBetween
-                    ) {
-                        Text(text = "• ${zone.name}", fontSize = 11.sp, modifier = Modifier.weight(1f))
-                        Text(
-                            text = "${(zone.nbSmallTables ?: 0) + (zone.nbLargeTables ?: 0) + (zone.nbCityHallTables ?: 0)} tables",
-                            fontSize = 11.sp,
-                            color = MaterialTheme.colorScheme.secondary
+                Spacer(Modifier.height(12.dp))
+                Text(text = "Zones Tarifaires", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.secondary)
+                Row(modifier = Modifier.horizontalScroll(rememberScrollState())) {
+                    festival.tariffZones.forEach { zone ->
+                        AssistChip(
+                            onClick = {},
+                            label = { Text(zone.name) },
+                            modifier = Modifier.padding(end = 4.dp)
                         )
                     }
                 }
             }
 
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(top = 8.dp),
-                horizontalArrangement = Arrangement.spacedBy(4.dp)
-            ) {
-                IconButton(onClick = onEdit, modifier = Modifier.size(32.dp)) {
-                    Icon(Icons.Default.Edit, contentDescription = "Modifier", tint = MaterialTheme.colorScheme.primary)
-                }
-                IconButton(onClick = onDelete, modifier = Modifier.size(32.dp)) {
-                    Icon(Icons.Default.Delete, contentDescription = "Supprimer", tint = MaterialTheme.colorScheme.error)
+            if (festival.planZones.isNotEmpty()) {
+                Spacer(Modifier.height(12.dp))
+                Text(text = "Zones Plan (Géo)", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.secondary)
+                FlowRow(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(4.dp)
+                ) {
+                    festival.planZones.forEach { pZone ->
+                        Badge(
+                            containerColor = MaterialTheme.colorScheme.tertiaryContainer,
+                            contentColor = MaterialTheme.colorScheme.onTertiaryContainer,
+                            modifier = Modifier.padding(vertical = 2.dp)
+                        ) {
+                            Row(modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp), verticalAlignment = Alignment.CenterVertically) {
+                                Icon(Icons.Default.Place, null, modifier = Modifier.size(12.dp))
+                                Spacer(Modifier.width(2.dp))
+                                Text("${pZone.name} (${pZone.nbTables})")
+                            }
+                        }
+                    }
                 }
             }
-            if (!isCurrent) {
-                Button(onClick = onMakeCurrent, modifier = Modifier.fillMaxWidth().padding(top = 8.dp)) {
-                    Text("Définir comme courant")
+
+            Spacer(Modifier.height(12.dp))
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.End
+            ) {
+                if (!isCurrent) {
+                    TextButton(onClick = onMakeCurrent) {
+                        Text("Définir courant")
+                    }
+                }
+                IconButton(onClick = onEdit) {
+                    Icon(Icons.Default.Edit, contentDescription = "Éditer", tint = MaterialTheme.colorScheme.primary)
+                }
+                IconButton(onClick = onDelete) {
+                    Icon(Icons.Default.Delete, contentDescription = "Supprimer", tint = MaterialTheme.colorScheme.error)
                 }
             }
 
