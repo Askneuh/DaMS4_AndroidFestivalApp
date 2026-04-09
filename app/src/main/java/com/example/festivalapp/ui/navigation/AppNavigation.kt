@@ -51,10 +51,19 @@ fun AppNavigation(
     val context = LocalContext.current
     val app = context.applicationContext as FestivalApplication
 
-    // Navigation Guard: Redirect to Login if unauthenticated
-    LaunchedEffect(isAuthenticated) {
-        if (!isAuthenticated) {
-            controller.navigateTo(AppDestinations.Login)
+    // Sync drawer state from model to UI
+    LaunchedEffect(model.isDrawerOpen()) {
+        if (model.isDrawerOpen()) {
+            drawerState.open()
+        } else {
+            drawerState.close()
+        }
+    }
+
+    // Sync UI drawer state back to model (when swiped closed)
+    LaunchedEffect(drawerState.currentValue) {
+        if (drawerState.isClosed && model.isDrawerOpen()) {
+            controller.closeDrawer()
         }
     }
 
@@ -63,48 +72,61 @@ fun AppNavigation(
         gesturesEnabled = isAuthenticated,
         drawerContent = {
             ModalDrawerSheet {
-                Spacer(Modifier.height(12.dp))
-                Text("Festival App", modifier = Modifier.padding(16.dp), style = MaterialTheme.typography.headlineSmall)
+                Text("Menu", modifier = Modifier.padding(16.dp), style = MaterialTheme.typography.titleLarge)
+                Spacer(modifier = Modifier.height(8.dp))
                 
                 NavigationDrawerItem(
-                    label = { Text("Accueil") },
-                    selected = model.currentDestination is AppDestinations.Home,
-                    onClick = { controller.navigateTo(AppDestinations.Home); controller.toggleDrawer() }
-                )
-                NavigationDrawerItem(
                     label = { Text("Festivals") },
-                    selected = model.currentDestination is AppDestinations.FestivalList,
-                    onClick = { controller.navigateTo(AppDestinations.FestivalList); controller.toggleDrawer() }
+                    selected = model.backStack.last() is AppDestinations.FestivalList,
+                    onClick = { controller.navigateTo(AppDestinations.FestivalList) }
                 )
                 NavigationDrawerItem(
                     label = { Text("Éditeurs") },
-                    selected = model.currentDestination is AppDestinations.EditorList,
-                    onClick = { controller.navigateTo(AppDestinations.EditorList); controller.toggleDrawer() }
+                    selected = model.backStack.last() is AppDestinations.EditorList,
+                    onClick = { controller.navigateTo(AppDestinations.EditorList) }
                 )
                 NavigationDrawerItem(
                     label = { Text("Suivi Réservations") },
-                    selected = model.currentDestination is AppDestinations.ReservationOverview,
-                    onClick = { controller.navigateTo(AppDestinations.ReservationOverview); controller.toggleDrawer() }
+                    selected = model.backStack.last() is AppDestinations.ReservationOverview,
+                    onClick = { controller.navigateTo(AppDestinations.ReservationOverview) }
                 )
                 NavigationDrawerItem(
+                    label = { Text("Jeux du Festival") },
+                    selected = model.backStack.last() is AppDestinations.FestivalGamesList,
+                    onClick = { controller.navigateTo(AppDestinations.FestivalGamesList) }
+                )
+                Spacer(modifier = Modifier.weight(1f))
+                NavigationDrawerItem(
                     label = { Text("Paramètres") },
-                    selected = model.currentDestination is AppDestinations.Settings,
-                    onClick = { controller.navigateTo(AppDestinations.Settings); controller.toggleDrawer() }
+                    selected = model.backStack.last() is AppDestinations.Settings,
+                    onClick = { controller.navigateTo(AppDestinations.Settings) }
                 )
             }
         }
     ) {
+        // Auth Guard: filter the backstack to show Login for private pages
+        val currentBackStack = if (!isAuthenticated) {
+            model.backStack.map { dest ->
+                if (dest.isPublic) dest else AppDestinations.Login
+            }.distinct()
+        } else {
+            model.backStack
+        }
+
         NavDisplay(
-            backstack = model.filteredBackstack,
-            onBack = { controller.navigateBack() }
+            backStack = currentBackStack,
+            onBack = { controller.navigateBack() },
         ) { key ->
             when (key) {
                 is AppDestinations.Home -> NavEntry(key) {
-                    HomeScreen(onMenuClick = { controller.toggleDrawer() })
+                    HomeScreen(
+                        onNavigateToSettings = { controller.navigateTo(AppDestinations.Settings) },
+                        onMenuClick = { controller.toggleDrawer() }
+                    )
                 }
                 is AppDestinations.Settings -> NavEntry(key) {
                     SettingsScreen(
-                        currentTheme = model.themeMode.collectAsState().value,
+                        currentTheme = model.themeMode,
                         onThemeChanged = { controller.setTheme(it) },
                         onNavigateBack = { controller.navigateBack() }
                     )
@@ -112,7 +134,7 @@ fun AppNavigation(
                 is AppDestinations.Login -> NavEntry(key) {
                     LoginScreen(
                         viewModel = viewModel(factory = AppViewModelProvider.Factory),
-                        onLoginSuccess = { 
+                        onLoginSuccess = {
                             controller.navigateTo(AppDestinations.Home)
                         }
                     )
