@@ -1,7 +1,5 @@
 package com.example.festivalapp.ui.navigation
 
-import com.example.festivalapp.ui.screen.home.HomeScreen
-import com.example.festivalapp.ui.screen.settings.SettingsScreen
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -23,19 +21,21 @@ import com.example.festivalapp.data.datastore.UserPreferencesDs
 import com.example.festivalapp.data.session.SessionRepository
 import com.example.festivalapp.ui.navigation.AppDestinations
 import com.example.festivalapp.ui.screen.login.LoginScreen
-import com.example.festivalapp.ui.screen.login.LoginViewModel
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import com.example.festivalapp.data.auth.AuthRepository
 import com.example.festivalapp.AppViewModelProvider
+import com.example.festivalapp.FestivalApplication
+import androidx.compose.ui.platform.LocalContext
 import com.example.festivalapp.ui.screen.festival.FestivalListScreen
 import com.example.festivalapp.ui.screen.festival.FestivalCreateScreen
-import com.example.festivalapp.ui.screen.publisher.PublisherListScreen
-import com.example.festivalapp.ui.screen.publisher.PublisherDetailScreen
+import com.example.festivalapp.ui.screen.editor.EditorListRoute
+import com.example.festivalapp.ui.screen.editor.EditorDetailRoute
 import com.example.festivalapp.ui.screen.reservation.ReservationOverviewScreen
 import com.example.festivalapp.ui.screen.reservation.ReservationDetailScreen
 import com.example.festivalapp.ui.screen.reservation.FestivalGamesListScreen
-import com.example.festivalapp.ui.screen.festival.FestivalViewModel
+import com.example.festivalapp.ui.screen.home.HomeScreen
+import com.example.festivalapp.ui.screen.settings.SettingsScreen
 
 @Composable
 fun AppNavigation(
@@ -48,6 +48,8 @@ fun AppNavigation(
     val authToken by sessionRepository.accessCookieFlow.collectAsState(initial = null)
     val isAuthenticated = authToken != null
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
+    val context = LocalContext.current
+    val app = context.applicationContext as FestivalApplication
 
     // Sync drawer state from model to UI
     LaunchedEffect(model.isDrawerOpen()) {
@@ -67,10 +69,12 @@ fun AppNavigation(
 
     ModalNavigationDrawer(
         drawerState = drawerState,
+        gesturesEnabled = isAuthenticated,
         drawerContent = {
             ModalDrawerSheet {
                 Text("Menu", modifier = Modifier.padding(16.dp), style = MaterialTheme.typography.titleLarge)
                 Spacer(modifier = Modifier.height(8.dp))
+                
                 NavigationDrawerItem(
                     label = { Text("Festivals") },
                     selected = model.backStack.last() is AppDestinations.FestivalList,
@@ -78,8 +82,8 @@ fun AppNavigation(
                 )
                 NavigationDrawerItem(
                     label = { Text("Éditeurs") },
-                    selected = model.backStack.last() is AppDestinations.PublisherList,
-                    onClick = { controller.navigateTo(AppDestinations.PublisherList) }
+                    selected = model.backStack.last() is AppDestinations.EditorList,
+                    onClick = { controller.navigateTo(AppDestinations.EditorList) }
                 )
                 NavigationDrawerItem(
                     label = { Text("Suivi Réservations") },
@@ -100,7 +104,7 @@ fun AppNavigation(
             }
         }
     ) {
-        // If not authenticated, we filter the backstack to show Login for private pages
+        // Auth Guard: filter the backstack to show Login for private pages
         val currentBackStack = if (!isAuthenticated) {
             model.backStack.map { dest ->
                 if (dest.isPublic) dest else AppDestinations.Login
@@ -109,12 +113,11 @@ fun AppNavigation(
             model.backStack
         }
 
-
         NavDisplay(
             backStack = currentBackStack,
             onBack = { controller.navigateBack() },
         ) { key ->
-             when (key) {
+            when (key) {
                 is AppDestinations.Home -> NavEntry(key) {
                     HomeScreen(
                         onNavigateToSettings = { controller.navigateTo(AppDestinations.Settings) },
@@ -140,7 +143,7 @@ fun AppNavigation(
                     FestivalListScreen(
                         viewModel = viewModel(factory = AppViewModelProvider.Factory),
                         onNavigateToCreate = { controller.navigateTo(AppDestinations.FestivalCreate()) },
-                        onNavigateToFestivalDetail = { id -> controller.navigateTo(AppDestinations.FestivalCreate(id)) },
+                        onNavigateToFestivalDetail = { name -> controller.navigateTo(AppDestinations.FestivalCreate(name)) },
                         onMenuClick = { controller.toggleDrawer() }
                     )
                 }
@@ -150,17 +153,17 @@ fun AppNavigation(
                         onNavigateBack = { controller.navigateBack() }
                     )
                 }
-                is AppDestinations.PublisherList -> NavEntry(key) {
-                    PublisherListScreen(
-                        onNavigateToAdd = { controller.navigateTo(AppDestinations.PublisherDetail()) },
-                        onNavigateToDetail = { id -> controller.navigateTo(AppDestinations.PublisherDetail(id)) },
-                        onMenuClick = { controller.toggleDrawer() }
+                is AppDestinations.EditorList -> NavEntry(key) {
+                    EditorListRoute(
+                        editorRepository = app.container.editorRepository,
+                        onEditorClick = { id -> controller.navigateTo(AppDestinations.EditorDetail(id)) }
                     )
                 }
-                is AppDestinations.PublisherDetail -> NavEntry(key) {
-                    PublisherDetailScreen(
-                        publisherId = key.publisherId,
-                        onNavigateBack = { controller.navigateBack() }
+                is AppDestinations.EditorDetail -> NavEntry(key) {
+                    EditorDetailRoute(
+                        editorRepository = app.container.editorRepository,
+                        editorId = key.editorId ?: 0,
+                        onBackClick = { controller.navigateBack() }
                     )
                 }
                 is AppDestinations.ReservationOverview -> NavEntry(key) {
@@ -171,7 +174,7 @@ fun AppNavigation(
                 }
                 is AppDestinations.ReservationDetail -> NavEntry(key) {
                     ReservationDetailScreen(
-                        publisherId = key.publisherId,
+                        editorId = key.editorId,
                         onNavigateBack = { controller.navigateBack() }
                     )
                 }
