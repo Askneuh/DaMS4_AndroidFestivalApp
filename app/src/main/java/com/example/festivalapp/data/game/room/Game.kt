@@ -10,13 +10,6 @@ data class Game(
     val author: String,
     val nbMinPlayer: Int,
     val nbMaxPlayer: Int,
-<<<<<<< HEAD
-    val minimumAge: Int,
-    val duration: Int,
-    val gameImage: String?,
-    val idEditor: Int
-)
-=======
     val gameNotice: String,
     val idGameType: Int,
     val minimumAge: Int,
@@ -29,4 +22,3 @@ data class Game(
     val edition: Int,
     val idEditor: Int
 )
->>>>>>> 82c0fb8 (a lot of things)
