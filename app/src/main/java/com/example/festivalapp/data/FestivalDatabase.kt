@@ -21,7 +21,7 @@ import com.example.festivalapp.data.contact.room.*
         PlanZoneEntity::class,
         Game::class,
         Contact::class,
-        com.example.festivalapp.data.festival.room.FestivalGameEntity::class,
+        FestivalGameEntity::class,
         ReservationGame::class,
         SuiviReservation::class
     ],
