@@ -41,9 +41,9 @@ val availableStatuses = listOf(
 @Composable
 fun ReservationListScreen(
     viewModel: ReservationListViewModel,
-    festivalName: String,
     onLogoutClick: () -> Unit
 ) {
+    val festivalName by viewModel.currentFestivalName.collectAsState()
     val networkState by viewModel.networkState.collectAsState()
     val items by viewModel.filteredItems.collectAsState()
     val searchQuery by viewModel.searchQuery.collectAsState()
@@ -212,13 +212,13 @@ fun EditorReservationCard(item: EditorWithReservationTuple) {
 @Composable
 fun ReservationListRoute(
     reservationRepository: ReservationRepository,
-    festivalName: String,
+    festivalRepository: FestivalRepository,
     onLogoutClick: () -> Unit
 ) {
     val factory = object : ViewModelProvider.Factory {
         override fun <T : ViewModel> create(modelClass: Class<T>): T {
             @Suppress("UNCHECKED_CAST")
-            return ReservationListViewModel(reservationRepository, festivalName) as T
+            return ReservationListViewModel(reservationRepository, festivalRepository) as T
         }
     }
 
@@ -226,7 +226,6 @@ fun ReservationListRoute(
 
     ReservationListScreen(
         viewModel = viewModel,
-        festivalName = festivalName,
         onLogoutClick = onLogoutClick
     )
 }

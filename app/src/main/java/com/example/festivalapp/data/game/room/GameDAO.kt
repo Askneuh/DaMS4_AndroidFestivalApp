@@ -16,4 +16,11 @@ interface GameDAO {
 
     @Query("DELETE FROM games WHERE id = :gameId")
     suspend fun deleteGameById(gameId: Int)
+
+    // Specific Festival Games
+    @Query("SELECT * FROM festival_games WHERE festivalId = :festivalId")
+    fun getFestivalGames(festivalId: Int): Flow<List<com.example.festivalapp.data.festival.room.FestivalGameEntity>>
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insertFestivalGame(festivalGame: com.example.festivalapp.data.festival.room.FestivalGameEntity)
 }

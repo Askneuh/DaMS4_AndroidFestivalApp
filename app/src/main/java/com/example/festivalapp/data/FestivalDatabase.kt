@@ -27,7 +27,8 @@ import com.example.festivalapp.data.user.room.UserDAO
         Reservation::class,
         PlanZoneEntity::class,
         Game::class,
-        Contact::class
+        Contact::class,
+        com.example.festivalapp.data.festival.room.FestivalGameEntity::class
     ],
     version = 5, 
     exportSchema = false

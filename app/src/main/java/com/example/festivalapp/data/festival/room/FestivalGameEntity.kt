@@ -8,7 +8,7 @@ data class FestivalGameEntity(
     @PrimaryKey(autoGenerate = true)
     val id: Int = 0,
     val festivalId: Int,
-    val publisherId: Int,
+    val editorId: Int,
     val gameId: Int,
     val planZone: String = "",
     val allocatedTables: Int = 0

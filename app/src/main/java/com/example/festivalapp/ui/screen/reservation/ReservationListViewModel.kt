@@ -4,17 +4,9 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.festivalapp.data.reservation.room.EditorWithReservationTuple
 import com.example.festivalapp.data.reservation.room.ReservationRepository
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.SharingStarted
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.stateIn
-import kotlinx.coroutines.flow.flatMapLatest
-import kotlinx.coroutines.flow.launchIn
-import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import com.example.festivalapp.data.festival.FestivalRepository
-import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 
 sealed interface ReservationListUiState {
@@ -38,7 +30,7 @@ class ReservationListViewModel(
     val statusFilter = MutableStateFlow("all")
 
     // --- Flux du nom du festival courant ---
-    private val _currentFestivalName = festivalRepository.getCurrentFestival()
+    val currentFestivalName: StateFlow<String> = festivalRepository.getCurrentFestival()
         .filterNotNull()
         .map { it.name }
         .stateIn(
@@ -48,8 +40,8 @@ class ReservationListViewModel(
         )
 
     // --- Flux brut depuis Room (réagit au changement de nom) ---
-    private val _allItems = _currentFestivalName.flatMapLatest { name ->
-        if (name.isBlank()) kotlinx.coroutines.flow.flowOf(emptyList())
+    private val _allItems = currentFestivalName.flatMapLatest { name ->
+        if (name.isBlank()) flowOf(emptyList())
         else reservationRepository.getEditorsWithReservations(name)
     }.stateIn(
         scope = viewModelScope,
@@ -75,7 +67,7 @@ class ReservationListViewModel(
 
     init {
         // Au démarrage et à chaque changement de festival, on tente un refresh
-        _currentFestivalName.onEach { name ->
+        currentFestivalName.onEach { name ->
             if (name.isNotBlank()) {
                 refresh(name)
             }
@@ -83,7 +75,7 @@ class ReservationListViewModel(
     }
 
     fun refresh(name: String? = null) {
-        val targetName = name ?: _currentFestivalName.value
+        val targetName = name ?: currentFestivalName.value
         if (targetName.isBlank()) return
 
         viewModelScope.launch {

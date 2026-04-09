@@ -32,6 +32,7 @@ import com.example.festivalapp.ui.screen.festival.FestivalCreateScreen
 import com.example.festivalapp.ui.screen.editor.EditorListRoute
 import com.example.festivalapp.ui.screen.editor.EditorDetailRoute
 import com.example.festivalapp.ui.screen.reservation.ReservationOverviewScreen
+import com.example.festivalapp.ui.screen.reservation.ReservationListRoute
 import com.example.festivalapp.ui.screen.reservation.ReservationDetailScreen
 import com.example.festivalapp.ui.screen.reservation.FestivalGamesListScreen
 import com.example.festivalapp.ui.screen.home.HomeScreen
@@ -167,9 +168,10 @@ fun AppNavigation(
                     )
                 }
                 is AppDestinations.ReservationOverview -> NavEntry(key) {
-                    ReservationOverviewScreen(
-                        onNavigateToReservationDetail = { id -> controller.navigateTo(AppDestinations.ReservationDetail(id)) },
-                        onMenuClick = { controller.toggleDrawer() }
+                    ReservationListRoute(
+                        reservationRepository = app.container.reservationRepository,
+                        festivalRepository = app.container.festivalRepository,
+                        onLogoutClick = { /* TODO: logout */ }
                     )
                 }
                 is AppDestinations.ReservationDetail -> NavEntry(key) {
