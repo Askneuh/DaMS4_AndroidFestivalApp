@@ -22,7 +22,7 @@ import com.example.festivalapp.AppViewModelProvider
 import com.example.festivalapp.data.game.room.Game
 import com.example.festivalapp.data.reservation.room.GameWithReservationInfo
 import com.example.festivalapp.data.reservation.room.Reservation
-import com.example.festivalapp.data.reservation.room.ReservationRepository
+import com.example.festivalapp.data.reservation.ReservationRepository
 import kotlin.math.ceil
 
 data class TariffZoneMock(

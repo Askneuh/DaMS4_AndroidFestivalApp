@@ -7,7 +7,7 @@ import com.example.festivalapp.data.game.room.Game
 import com.example.festivalapp.data.game.room.GameRepository
 import com.example.festivalapp.data.reservation.room.GameWithReservationInfo
 import com.example.festivalapp.data.reservation.room.Reservation
-import com.example.festivalapp.data.reservation.room.ReservationRepository
+import com.example.festivalapp.data.reservation.ReservationRepository
 import com.example.festivalapp.data.reservation.retrofit.UpdateReservationRequest
 import com.example.festivalapp.data.reservation.room.SuiviReservation
 import kotlinx.coroutines.flow.SharingStarted

@@ -23,6 +23,8 @@ class ReservationListViewModel(
     private val festivalName: String = "Festival-Nouveau"
 ) : ViewModel() {
 
+    val currentFestivalName = MutableStateFlow(festivalName)
+
     private val _networkState = MutableStateFlow<ReservationListUiState>(ReservationListUiState.Loading)
     val networkState = _networkState.asStateFlow()
 

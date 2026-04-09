@@ -208,14 +208,13 @@ fun EditorReservationCard(
 @Composable
 fun ReservationListRoute(
     reservationRepository: ReservationRepository,
-    festivalRepository: FestivalRepository,
     onLogoutClick: () -> Unit,
     onReservationClick: (Int) -> Unit
 ) {
     val factory = object : ViewModelProvider.Factory {
         override fun <T : ViewModel> create(modelClass: Class<T>): T {
             @Suppress("UNCHECKED_CAST")
-            return ReservationListViewModel(reservationRepository, festivalRepository) as T
+            return ReservationListViewModel(reservationRepository) as T
         }
     }
 

@@ -26,7 +26,7 @@ class EditorRepository(
     }
 
     fun getGamesByEditor(editorId: Int): Flow<List<Game>> {
-        return gameDAO.getGamesByEditor(editorId)
+        return gameDAO.getGamesStreamByEditor(editorId)
     }
 
     fun getContactsByEditor(editorId: Int): Flow<List<Contact>> {
