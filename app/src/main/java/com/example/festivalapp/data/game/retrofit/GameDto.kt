@@ -10,18 +10,17 @@ data class GameDto(
     val author: String,
     val nbMinPlayer: Int,
     val nbMaxPlayer: Int,
-    val minimumAge: Int,
-    val duration: Int,
-    val gameImage: String? = null,
-    val idEditor: Int,
-    // Champs supplémentaires du JSON qu'on ne stocke pas forcément en local
     val gameNotice: String? = null,
     val idGameType: Int? = null,
+    val minimumAge: Int,
     val prototype: Boolean = false,
+    val duration: Int,
     val theme: String? = null,
     val description: String? = null,
+    val gameImage: String? = null,
     val rulesTutorial: String? = null,
-    val edition: Int? = null
+    val edition: Int? = null,
+    val idEditor: Int
 ) {
     fun toRoom(): Game = Game(
         id = id,
@@ -29,9 +28,16 @@ data class GameDto(
         author = author,
         nbMinPlayer = nbMinPlayer,
         nbMaxPlayer = nbMaxPlayer,
+        gameNotice = gameNotice ?: "",
+        idGameType = idGameType ?: 0,
         minimumAge = minimumAge,
+        prototype = prototype,
         duration = duration,
-        gameImage = gameImage,
+        theme = theme ?: "",
+        description = description ?: "",
+        gameImage = gameImage ?: "",
+        rulesTutorial = rulesTutorial ?: "",
+        edition = edition ?: 0,
         idEditor = idEditor
     )
 }

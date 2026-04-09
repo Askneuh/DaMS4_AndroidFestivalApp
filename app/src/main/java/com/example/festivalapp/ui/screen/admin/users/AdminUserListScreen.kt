@@ -28,11 +28,9 @@ import com.example.festivalapp.data.user.room.UserRepository
 @Composable
 @OptIn(ExperimentalMaterial3Api::class)
 fun AdminUserListScreen(viewModel: AdminUserListViewModel, onLogoutClick: () -> Unit) {
-    // On s'abonne aux deux tuyaux (Flow) du ViewModel !
     val networkState by viewModel.networkState.collectAsState()
     val localUsers by viewModel.localUsersState.collectAsState()
 
-    // L'interface globale (la barre du haut + le contenu)
     Scaffold(
         topBar = {
             TopAppBar(
@@ -48,13 +46,11 @@ fun AdminUserListScreen(viewModel: AdminUserListViewModel, onLogoutClick: () -> 
     ) { paddingValues ->
         Box(modifier = Modifier.fillMaxSize().padding(paddingValues)) {
 
-            // 1. LA LISTE
             LazyColumn(
                 modifier = Modifier.fillMaxSize(),
                 contentPadding = PaddingValues(16.dp),
                 verticalArrangement = Arrangement.spacedBy(16.dp)
             ) {
-                // Pour chaque utilisateur dans notre liste, on dessine sa 'Carte'
                 items(localUsers) { user ->
                     UserCard(
                         user = user,
@@ -64,12 +60,10 @@ fun AdminUserListScreen(viewModel: AdminUserListViewModel, onLogoutClick: () -> 
                 }
             }
 
-            // 2. L'INDICATEUR DE CHARGEMENT RÉSEAU
             if (networkState is UserListUiState.Loading) {
                 CircularProgressIndicator(modifier = Modifier.align(Alignment.TopCenter).padding(8.dp))
             }
 
-            // 3. LE MESSAGE D'ERREUR (S'IL N'Y A PAS INTERNET)
             if (networkState is UserListUiState.Error) {
                 val errorMsg = (networkState as UserListUiState.Error).message
                 Snackbar(modifier = Modifier.align(Alignment.BottomCenter).padding(16.dp)) {
@@ -87,11 +81,9 @@ fun UserCard(
     onDeleteClick: () -> Unit,
     onUpdateRoleClick: (String) -> Unit
 ) {
-    // Ces variables locales servent pour savoir s'il faut afficher nos boites de dialogues (pop-ups)
     var showDeleteDialog by remember { mutableStateOf(false) }
     var showEditDialog by remember { mutableStateOf(false) }
 
-    // Couleur stylisée en fonction du Rôle (comme sur ton image !)
     val roleColor = when (user.role.lowercase()) {
         "administrateur" -> Color(0xFFE53935) // Rouge
         "organisateur" -> Color(0xFF8E24AA) // Violet
@@ -99,7 +91,6 @@ fun UserCard(
         else -> Color(0xFF7CB342) // Vert pour Visiteur
     }
 
-    // Le visuel de la Carte Utilisateur
     Card(
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
@@ -130,7 +121,6 @@ fun UserCard(
 
             Spacer(modifier = Modifier.height(12.dp))
 
-            // Ligne pour les Boutons d'Action (Modifier / Supprimer)
             Row(horizontalArrangement = Arrangement.End, modifier = Modifier.fillMaxWidth()) {
                 IconButton(onClick = { showEditDialog = true }) {
                     Icon(imageVector = Icons.Default.Edit, contentDescription = "Modifier le rôle", tint = Color(0xFF1E88E5))
@@ -142,9 +132,7 @@ fun UserCard(
         }
     }
 
-    // --- POP UPs CACHÉES (Elles s'affichent si on clique sur un bouton) ---
 
-    // 1. Dialogue de confirmation de Suppression
     if (showDeleteDialog) {
         AlertDialog(
             onDismissRequest = { showDeleteDialog = false },
@@ -152,7 +140,7 @@ fun UserCard(
             text = { Text("Voulez-vous vraiment supprimer l'utilisateur ${user.login} ? Cette action est définitive coté serveur.") },
             confirmButton = {
                 TextButton(onClick = {
-                    onDeleteClick() // Appelle le ViewModel
+                    onDeleteClick()
                     showDeleteDialog = false
                 }) { Text("Supprimer", color = Color.Red) }
             },
@@ -162,24 +150,27 @@ fun UserCard(
         )
     }
 
-    // 2. Dialogue d'Édition du Rôle
     if (showEditDialog) {
         AlertDialog(
             onDismissRequest = { showEditDialog = false },
             title = { Text("Modifier le rôle de ${user.login}") },
             text = {
                 Column {
-                    // On propose les 4 rôles possibles
-                    val roles = listOf("Administrateur", "Organisateur", "Editeur", "Visiteur")
-                    roles.forEach { role ->
+                    val roles = listOf(
+                        "Administrateur" to "admin",
+                        "Organisateur"   to "organisateur",
+                        "Éditeur"        to "editeur_jeu",
+                        "Visiteur"       to "visiteur"
+                    )
+                    roles.forEach { (label, value) ->
                         TextButton(
                             onClick = {
-                                onUpdateRoleClick(role) // Appelle le ViewModel
+                                onUpdateRoleClick(value)
                                 showEditDialog = false
                             },
                             modifier = Modifier.fillMaxWidth()
                         ) {
-                            Text(role)
+                            Text(label)
                         }
                     }
                 }
@@ -194,9 +185,7 @@ fun UserCard(
 
 @Composable
 fun AdminUserListRoute(onLogoutClick: () -> Unit) {
-    // Android sait désormais comment construire ce beau ViewModel grâce à AppViewModelProvider !
     val adminViewModel: AdminUserListViewModel = viewModel(factory = AppViewModelProvider.Factory)
-
     AdminUserListScreen(
         viewModel = adminViewModel,
         onLogoutClick = onLogoutClick

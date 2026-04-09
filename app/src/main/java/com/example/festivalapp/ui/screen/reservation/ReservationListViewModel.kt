@@ -3,10 +3,11 @@ package com.example.festivalapp.ui.screen.reservation
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.festivalapp.data.reservation.room.EditorWithReservationTuple
-import com.example.festivalapp.data.reservation.room.ReservationRepository
+import com.example.festivalapp.data.reservation.ReservationRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
@@ -19,18 +20,17 @@ sealed interface ReservationListUiState {
 
 class ReservationListViewModel(
     private val reservationRepository: ReservationRepository,
-    private val festivalName: String = "Festival-Nouveau" // Le festival courant est passé à l'initialisation
+    private val festivalName: String = "Festival-Nouveau"
 ) : ViewModel() {
 
-    // --- État réseau (Loading / Success / Error) ---
-    private val _networkState = MutableStateFlow<ReservationListUiState>(ReservationListUiState.Loading)
-    val networkState: StateFlow<ReservationListUiState> = _networkState
+    val currentFestivalName = MutableStateFlow(festivalName)
 
-    // --- Filtres (modifiables par l'UI) ---
+    private val _networkState = MutableStateFlow<ReservationListUiState>(ReservationListUiState.Loading)
+    val networkState = _networkState.asStateFlow()
+
     val searchQuery = MutableStateFlow("")
     val statusFilter = MutableStateFlow("all")
 
-    // --- Flux brut depuis Room ---
     private val _allItems = reservationRepository.getEditorsWithReservations(festivalName)
         .stateIn(
             scope = viewModelScope,
@@ -38,7 +38,6 @@ class ReservationListViewModel(
             initialValue = emptyList()
         )
 
-    // --- Flux filtré (combine les données + les filtres en temps réel) ---
     val filteredItems: StateFlow<List<EditorWithReservationTuple>> =
         combine(_allItems, searchQuery, statusFilter) { items, query, status ->
             items
@@ -66,6 +65,18 @@ class ReservationListViewModel(
                 _networkState.value = ReservationListUiState.Success
             } catch (e: Exception) {
                 _networkState.value = ReservationListUiState.Error("Erreur réseau: ${e.message}")
+            }
+        }
+    }
+
+    fun createReservation(editorId: Int) {
+        viewModelScope.launch {
+            _networkState.value = ReservationListUiState.Loading
+            try {
+                reservationRepository.createReservation(editorId, festivalName)
+                _networkState.value = ReservationListUiState.Success
+            } catch (e: Exception) {
+                _networkState.value = ReservationListUiState.Error("Erreur lors de la création : ${e.message}")
             }
         }
     }

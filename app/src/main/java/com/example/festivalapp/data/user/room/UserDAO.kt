@@ -11,7 +11,6 @@ import kotlinx.coroutines.flow.Flow
 
 @Dao
 interface UserDAO {
-    //REPLACE pour que si le rôle dans le back change, il change ici aussi
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insert(user: User)
 
@@ -29,4 +28,7 @@ interface UserDAO {
 
     @Query("SELECT * from users ORDER BY login ASC")
     fun getAllUsers(): Flow<List<User>>
+
+    @Query("UPDATE users SET role = :newRole WHERE id = :userId")
+    suspend fun updateRole(userId: Int, newRole: String)
 }

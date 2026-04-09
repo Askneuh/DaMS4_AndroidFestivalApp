@@ -26,7 +26,7 @@ class SessionRepository(private val dataStore: DataStore<Preferences>) {
     val accessCookieFlow: Flow<String?> = dataStore.data
         .catch {
             if (it is IOException) {
-                emit(emptyPreferences())  // émet des préférences vides en cas d'erreur disque
+                emit(emptyPreferences())
             } else {
                 throw it
             }
@@ -38,7 +38,7 @@ class SessionRepository(private val dataStore: DataStore<Preferences>) {
     val refreshCookieFlow: Flow<String?> = dataStore.data
         .catch {
             if (it is IOException) {
-                emit(emptyPreferences())  // émet des préférences vides en cas d'erreur disque
+                emit(emptyPreferences())
             } else {
                 throw it
             }
@@ -50,7 +50,7 @@ class SessionRepository(private val dataStore: DataStore<Preferences>) {
     val roleFlow: Flow<String?> = dataStore.data
         .catch {
             if (it is IOException) {
-                emit(emptyPreferences())  // émet des préférences vides en cas d'erreur disque
+                emit(emptyPreferences())
             } else {
                 throw it
             }

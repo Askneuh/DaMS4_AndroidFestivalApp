@@ -167,19 +167,21 @@ fun AppNavigation(
                     )
                 }
                 is AppDestinations.ReservationOverview -> NavEntry(key) {
-                    ReservationOverviewScreen(
-                        onNavigateToReservationDetail = { id -> controller.navigateTo(AppDestinations.ReservationDetail(id)) },
-                        onMenuClick = { controller.toggleDrawer() }
+                    ReservationListRoute(
+                        reservationRepository = app.container.reservationRepository,
+                        onMenuClick = { controller.toggleDrawer() },
+                        onReservationClick = { id -> controller.navigateTo(AppDestinations.ReservationDetail(id)) }
                     )
                 }
                 is AppDestinations.ReservationDetail -> NavEntry(key) {
                     ReservationDetailScreen(
-                        editorId = key.editorId,
+                        reservationId = key.reservationId,
                         onNavigateBack = { controller.navigateBack() }
                     )
                 }
                 is AppDestinations.FestivalGamesList -> NavEntry(key) {
-                    FestivalGamesListScreen(
+                    com.example.festivalapp.ui.screen.reservation.FestivalGamesListRoute(
+                        gameRepository = app.container.gameRepository,
                         onMenuClick = { controller.toggleDrawer() }
                     )
                 }

@@ -4,7 +4,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ExitToApp
+import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -17,9 +17,8 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.festivalapp.data.reservation.room.EditorWithReservationTuple
-import com.example.festivalapp.data.reservation.room.ReservationRepository
+import com.example.festivalapp.data.reservation.ReservationRepository
 
-// ─── Couleurs des statuts (calquées sur ton Angular getStatusColor) ───────────
 fun getStatusColor(status: String?): Color = when (status) {
     "Présent"              -> Color(0xFF4CAF50)
     "Facturé"              -> Color(0xFF2196F3)
@@ -28,7 +27,7 @@ fun getStatusColor(status: String?): Color = when (status) {
     "Discussion en cours"  -> Color(0xFFFF9800)
     "Sera absent"          -> Color(0xFFF44336)
     "Considéré absent"     -> Color(0xFFF44336)
-    else                   -> Color(0xFF9E9E9E) // "Pas encore de contact"
+    else                   -> Color(0xFF9E9E9E)
 }
 
 val availableStatuses = listOf(
@@ -36,14 +35,14 @@ val availableStatuses = listOf(
     "Sera absent", "Considéré absent", "Présent", "Facturé", "Facture payée"
 )
 
-// ─── Écran principal ──────────────────────────────────────────────────────────
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ReservationListScreen(
     viewModel: ReservationListViewModel,
-    festivalName: String,
-    onLogoutClick: () -> Unit
+    onMenuClick: () -> Unit,
+    onReservationClick: (Int) -> Unit
 ) {
+    val festivalName by viewModel.currentFestivalName.collectAsState()
     val networkState by viewModel.networkState.collectAsState()
     val items by viewModel.filteredItems.collectAsState()
     val searchQuery by viewModel.searchQuery.collectAsState()
@@ -51,7 +50,6 @@ fun ReservationListScreen(
     val snackbarHostState = remember { SnackbarHostState() }
     var statusMenuExpanded by remember { mutableStateOf(false) }
 
-    // Affiche les erreurs réseau en Snackbar (les données Room restent visibles)
     LaunchedEffect(networkState) {
         if (networkState is ReservationListUiState.Error) {
             snackbarHostState.showSnackbar(
@@ -75,12 +73,14 @@ fun ReservationListScreen(
                         )
                     }
                 },
+                navigationIcon = {
+                    IconButton(onClick = onMenuClick) {
+                        Icon(Icons.Default.Menu, contentDescription = "Menu")
+                    }
+                },
                 actions = {
                     IconButton(onClick = { viewModel.refresh() }) {
                         Icon(Icons.Default.Refresh, contentDescription = "Rafraîchir")
-                    }
-                    IconButton(onClick = onLogoutClick) {
-                        Icon(Icons.Default.ExitToApp, contentDescription = "Déconnexion")
                     }
                 }
             )
@@ -91,7 +91,6 @@ fun ReservationListScreen(
             contentPadding = PaddingValues(16.dp),
             verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
-            // ─── Barre de recherche ───────────────────────────────────────
             item {
                 OutlinedTextField(
                     value = searchQuery,
@@ -102,7 +101,6 @@ fun ReservationListScreen(
                 )
             }
 
-            // ─── Dropdown Statut ──────────────────────────────────────────
             item {
                 Box(modifier = Modifier.fillMaxWidth()) {
                     OutlinedButton(onClick = { statusMenuExpanded = true }) {
@@ -125,14 +123,12 @@ fun ReservationListScreen(
                 }
             }
 
-            // ─── Loading indicator ────────────────────────────────────────
             if (networkState is ReservationListUiState.Loading) {
                 item {
                     LinearProgressIndicator(modifier = Modifier.fillMaxWidth().padding(bottom = 8.dp))
                 }
             }
 
-            // ─── Liste des éditeurs ───────────────────────────────────────
             if (items.isEmpty() && networkState !is ReservationListUiState.Loading) {
                 item {
                     Box(modifier = Modifier.fillMaxWidth().padding(vertical = 32.dp), contentAlignment = Alignment.Center) {
@@ -141,16 +137,23 @@ fun ReservationListScreen(
                 }
             } else {
                 items(items, key = { it.editorId }) { item ->
-                    EditorReservationCard(item = item)
+                    EditorReservationCard(
+                        item = item,
+                        onReservationClick = onReservationClick,
+                        onCreateReservation = { viewModel.createReservation(item.editorId) }
+                    )
                 }
             }
         }
     }
 }
 
-// ─── Carte d'un éditeur ───────────────────────────────────────────────────────
 @Composable
-fun EditorReservationCard(item: EditorWithReservationTuple) {
+fun EditorReservationCard(
+    item: EditorWithReservationTuple,
+    onReservationClick: (Int) -> Unit,
+    onCreateReservation: () -> Unit
+) {
     val statusColor = getStatusColor(item.status)
     val displayStatus = item.status ?: "Pas encore de contact"
 
@@ -163,12 +166,10 @@ fun EditorReservationCard(item: EditorWithReservationTuple) {
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
-            // Infos éditeur + statut
             Column(modifier = Modifier.weight(1f)) {
                 Text(text = item.editorName, fontWeight = FontWeight.Bold, style = MaterialTheme.typography.bodyLarge)
                 Spacer(modifier = Modifier.height(6.dp))
 
-                // Badge statut coloré
                 Surface(
                     color = statusColor,
                     shape = MaterialTheme.shapes.small
@@ -182,7 +183,6 @@ fun EditorReservationCard(item: EditorWithReservationTuple) {
                     )
                 }
 
-                // Tables (si réservation)
                 if (item.totalTables != null && item.totalTables > 0) {
                     Spacer(modifier = Modifier.height(4.dp))
                     Text(
@@ -193,14 +193,13 @@ fun EditorReservationCard(item: EditorWithReservationTuple) {
                 }
             }
 
-            // Bouton Gérer ou Réserver
             Spacer(modifier = Modifier.width(8.dp))
             if (item.idReservation != null) {
-                Button(onClick = { /* TODO: naviguer vers ReservationDetail */ }) {
-                    Text("Gérer")
+                Button(onClick = { onReservationClick(item.idReservation) }) {
+                    Text("Gérer #${item.idReservation}")
                 }
             } else {
-                OutlinedButton(onClick = { /* TODO: créer réservation */ }) {
+                OutlinedButton(onClick = onCreateReservation) {
                     Text("Réserver")
                 }
             }
@@ -208,17 +207,16 @@ fun EditorReservationCard(item: EditorWithReservationTuple) {
     }
 }
 
-// ─── Route (Factory + ViewModel) ─────────────────────────────────────────────
 @Composable
 fun ReservationListRoute(
     reservationRepository: ReservationRepository,
-    festivalName: String,
-    onLogoutClick: () -> Unit
+    onMenuClick: () -> Unit,
+    onReservationClick: (Int) -> Unit
 ) {
     val factory = object : ViewModelProvider.Factory {
         override fun <T : ViewModel> create(modelClass: Class<T>): T {
             @Suppress("UNCHECKED_CAST")
-            return ReservationListViewModel(reservationRepository, festivalName) as T
+            return ReservationListViewModel(reservationRepository) as T
         }
     }
 
@@ -226,7 +224,7 @@ fun ReservationListRoute(
 
     ReservationListScreen(
         viewModel = viewModel,
-        festivalName = festivalName,
-        onLogoutClick = onLogoutClick
+        onMenuClick = onMenuClick,
+        onReservationClick = onReservationClick
     )
 }

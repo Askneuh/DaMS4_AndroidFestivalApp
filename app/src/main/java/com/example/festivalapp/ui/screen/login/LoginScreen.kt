@@ -33,9 +33,8 @@ fun LoginScreen(
 ) {
     val loginState by viewModel.loginState.collectAsState()
 
-    // Naviguer vers la page suivante si le login réussit
     LaunchedEffect(loginState) {
-        if (loginState is LoginResult.Success) {
+        if (loginState is LoginUiState.Success) {
             onLoginSuccess()
         }
     }
@@ -48,7 +47,7 @@ fun LoginScreen(
 
 @Composable
 fun LoginScreenContent(
-    loginState: LoginResult?,
+    loginState: LoginUiState?,
     onLogin: (String, String) -> Unit,
     modifier: Modifier = Modifier
 ) {
@@ -69,7 +68,6 @@ fun LoginScreenContent(
             verticalArrangement = Arrangement.spacedBy(16.dp),
             modifier = Modifier.fillMaxWidth()
         ) {
-            // Titre
             Text(
                 text = "Connexion",
                 style = MaterialTheme.typography.headlineMedium
@@ -77,7 +75,6 @@ fun LoginScreenContent(
 
             Spacer(modifier = Modifier.height(8.dp))
 
-            // Champ nom d'utilisateur
             OutlinedTextField(
                 value = username,
                 onValueChange = { username = it },
@@ -91,10 +88,9 @@ fun LoginScreenContent(
                 keyboardActions = KeyboardActions(
                     onNext = { focusManager.moveFocus(FocusDirection.Down) }
                 ),
-                isError = loginState is LoginResult.Error
+                isError = loginState is LoginUiState.Error
             )
 
-            // Champ mot de passe
             OutlinedTextField(
                 value = password,
                 onValueChange = { password = it },
@@ -123,11 +119,10 @@ fun LoginScreenContent(
                         }
                     }
                 ),
-                isError = loginState is LoginResult.Error
+                isError = loginState is LoginUiState.Error
             )
 
-            // Message d'erreur
-            if (loginState is LoginResult.Error) {
+            if (loginState is LoginUiState.Error) {
                 Text(
                     text = loginState.message,
                     color = MaterialTheme.colorScheme.error,
@@ -137,15 +132,14 @@ fun LoginScreenContent(
 
             Spacer(modifier = Modifier.height(8.dp))
 
-            // Bouton de connexion
             Button(
                 onClick = { onLogin(username, password) },
-                enabled = username.isNotBlank() && password.isNotBlank() && loginState !is LoginResult.Loading,
+                enabled = username.isNotBlank() && password.isNotBlank() && loginState !is LoginUiState.Loading,
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(50.dp)
             ) {
-                if (loginState is LoginResult.Loading) {
+                if (loginState is LoginUiState.Loading) {
                     CircularProgressIndicator(
                         modifier = Modifier.size(24.dp),
                         color = MaterialTheme.colorScheme.onPrimary,
@@ -189,7 +183,7 @@ fun LoginScreenDefaultPreview() {
 fun LoginScreenErrorPreview() {
     FestivalAppTheme {
         LoginScreenContent(
-            loginState = LoginResult.Error("Identifiants incorrects"),
+            loginState = LoginUiState.Error("Identifiants incorrects"),
             onLogin = { _, _ -> }
         )
     }
@@ -200,7 +194,7 @@ fun LoginScreenErrorPreview() {
 fun LoginScreenLoadingPreview() {
     FestivalAppTheme {
         LoginScreenContent(
-            loginState = LoginResult.Loading,
+            loginState = LoginUiState.Loading,
             onLogin = { _, _ -> }
         )
     }

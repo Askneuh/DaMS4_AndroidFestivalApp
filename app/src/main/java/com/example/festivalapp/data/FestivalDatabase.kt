@@ -1,22 +1,15 @@
 package com.example.festivalapp.data
 
 import android.content.Context
-import androidx.room.*
+import androidx.room.Database
+import androidx.room.Room
+import androidx.room.RoomDatabase
 import com.example.festivalapp.data.editor.room.*
 import com.example.festivalapp.data.festival.*
 import com.example.festivalapp.data.reservation.room.*
 import com.example.festivalapp.data.user.room.*
 import com.example.festivalapp.data.game.room.*
 import com.example.festivalapp.data.contact.room.*
-import com.example.festivalapp.data.festival.FestivalEntity
-import com.example.festivalapp.data.festival.TariffZoneDao
-import com.example.festivalapp.data.festival.TariffZoneEntity
-import com.example.festivalapp.data.festival.PlanZoneDao
-import com.example.festivalapp.data.festival.PlanZoneEntity
-import com.example.festivalapp.data.reservation.room.Reservation
-import com.example.festivalapp.data.reservation.room.ReservationDAO
-import com.example.festivalapp.data.user.room.User
-import com.example.festivalapp.data.user.room.UserDAO
 
 @Database(
     entities = [
@@ -27,7 +20,10 @@ import com.example.festivalapp.data.user.room.UserDAO
         Reservation::class,
         PlanZoneEntity::class,
         Game::class,
-        Contact::class
+        Contact::class,
+        FestivalGameEntity::class,
+        ReservationGame::class,
+        SuiviReservation::class
     ],
     version = 5, 
     exportSchema = false
@@ -45,7 +41,8 @@ abstract class FestivalDatabase: RoomDatabase() {
     abstract fun reservationDAO(): ReservationDAO
     abstract fun gameDAO(): GameDAO
     abstract fun contactDAO(): ContactDAO
-
+    abstract fun reservationGameDAO(): ReservationGameDAO
+    abstract fun suiviReservationDAO(): SuiviReservationDAO
     companion object {
         @Volatile
         private var INSTANCE: FestivalDatabase? = null

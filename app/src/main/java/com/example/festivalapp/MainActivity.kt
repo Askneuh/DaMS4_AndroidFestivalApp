@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import com.example.festivalapp.ui.navigation.AppNavigation
@@ -19,7 +20,6 @@ import com.example.festivalapp.ui.theme.FestivalAppTheme
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        
         val container = (application as FestivalApplication).container
 
         enableEdgeToEdge()
@@ -38,7 +38,7 @@ class MainActivity : ComponentActivity() {
             val darkTheme = when (themeMode) {
                 ThemeMode.Light -> false
                 ThemeMode.Dark -> true
-                ThemeMode.System -> androidx.compose.foundation.isSystemInDarkTheme()
+                ThemeMode.System -> isSystemInDarkTheme()
             }
 
             FestivalAppTheme(darkTheme = darkTheme) {
