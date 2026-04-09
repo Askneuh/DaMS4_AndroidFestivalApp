@@ -4,7 +4,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ExitToApp
+import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -39,7 +39,7 @@ val availableStatuses = listOf(
 @Composable
 fun ReservationListScreen(
     viewModel: ReservationListViewModel,
-    onLogoutClick: () -> Unit,
+    onMenuClick: () -> Unit,
     onReservationClick: (Int) -> Unit
 ) {
     val festivalName by viewModel.currentFestivalName.collectAsState()
@@ -73,12 +73,14 @@ fun ReservationListScreen(
                         )
                     }
                 },
+                navigationIcon = {
+                    IconButton(onClick = onMenuClick) {
+                        Icon(Icons.Default.Menu, contentDescription = "Menu")
+                    }
+                },
                 actions = {
                     IconButton(onClick = { viewModel.refresh() }) {
                         Icon(Icons.Default.Refresh, contentDescription = "Rafraîchir")
-                    }
-                    IconButton(onClick = onLogoutClick) {
-                        Icon(Icons.Default.ExitToApp, contentDescription = "Déconnexion")
                     }
                 }
             )
@@ -208,7 +210,7 @@ fun EditorReservationCard(
 @Composable
 fun ReservationListRoute(
     reservationRepository: ReservationRepository,
-    onLogoutClick: () -> Unit,
+    onMenuClick: () -> Unit,
     onReservationClick: (Int) -> Unit
 ) {
     val factory = object : ViewModelProvider.Factory {
@@ -222,7 +224,7 @@ fun ReservationListRoute(
 
     ReservationListScreen(
         viewModel = viewModel,
-        onLogoutClick = onLogoutClick,
+        onMenuClick = onMenuClick,
         onReservationClick = onReservationClick
     )
 }
