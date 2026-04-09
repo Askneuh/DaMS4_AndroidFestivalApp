@@ -8,35 +8,13 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
-<<<<<<< HEAD
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import com.example.festivalapp.ui.navigation.AppNavigation
 import com.example.festivalapp.ui.navigation.NavigationController
 import com.example.festivalapp.ui.navigation.NavigationModel
 import com.example.festivalapp.ui.navigation.ThemeMode
-=======
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
-import androidx.compose.ui.tooling.preview.Preview
-import androidx.lifecycle.viewmodel.compose.viewModel
-import com.example.festivalapp.ui.screen.admin.users.AdminUserListRoute
-import com.example.festivalapp.ui.screen.login.LoginRoute
-import com.example.festivalapp.ui.screen.login.LoginScreen
-import com.example.festivalapp.ui.screen.login.LoginScreenContent
-import com.example.festivalapp.ui.screen.login.LoginViewModel
-import com.example.festivalapp.ui.screen.register.RegisterRoute
-import com.example.festivalapp.ui.screen.register.RegisterScreen
-import com.example.festivalapp.ui.screen.reservation.ReservationDetailRoute
-import com.example.festivalapp.ui.screen.reservation.ReservationListRoute
->>>>>>> 82c0fb8 (a lot of things)
 import com.example.festivalapp.ui.theme.FestivalAppTheme
 
 class MainActivity : ComponentActivity() {

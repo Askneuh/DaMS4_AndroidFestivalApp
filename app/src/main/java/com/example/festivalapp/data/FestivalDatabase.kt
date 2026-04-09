@@ -1,30 +1,15 @@
 package com.example.festivalapp.data
 
 import android.content.Context
-<<<<<<< HEAD
-import androidx.room.*
+import androidx.room.Database
+import androidx.room.Room
+import androidx.room.RoomDatabase
 import com.example.festivalapp.data.editor.room.*
 import com.example.festivalapp.data.festival.*
 import com.example.festivalapp.data.reservation.room.*
 import com.example.festivalapp.data.user.room.*
 import com.example.festivalapp.data.game.room.*
 import com.example.festivalapp.data.contact.room.*
-import com.example.festivalapp.data.festival.FestivalEntity
-import com.example.festivalapp.data.festival.TariffZoneDao
-import com.example.festivalapp.data.festival.TariffZoneEntity
-import com.example.festivalapp.data.festival.PlanZoneDao
-import com.example.festivalapp.data.festival.PlanZoneEntity
-=======
-import androidx.room.Database
-import androidx.room.Room
-import androidx.room.RoomDatabase
-import com.example.festivalapp.data.editor.room.Editor
-import com.example.festivalapp.data.editor.room.EditorDAO
-import com.example.festivalapp.data.game.room.Game
-import com.example.festivalapp.data.game.room.GameDAO
-import com.example.festivalapp.data.reservation.room.*
-import com.example.festivalapp.data.user.room.User
-import com.example.festivalapp.data.user.room.UserDAO
 
 @Database(
     entities = [

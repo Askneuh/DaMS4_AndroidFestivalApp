@@ -35,7 +35,6 @@ object AppViewModelProvider {
             )
         }
 
-<<<<<<< HEAD
         initializer {
             FestivalViewModel(festivalRepository = festivalApplication().container.festivalRepository)
         }
@@ -51,12 +50,6 @@ object AppViewModelProvider {
                 savedStateHandle = this.createSavedStateHandle()
             )
         }
-=======
-        initializer { ReservationDetailViewModel(
-            reservationRepository = festivalApplication().container.reservationRepository,
-            gameRepository = festivalApplication().container.gameRepository
-        ) }
->>>>>>> 5c34157 (feat: register, refactor code, TODO : link tariffZone to reservation, change navigation to go from reservationList to reservationDetail)
     }
 }
 
