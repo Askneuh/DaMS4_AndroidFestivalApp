@@ -31,7 +31,7 @@ object AppViewModelProvider {
         initializer {
             ReservationListViewModel(
                 reservationRepository = festivalApplication().container.reservationRepository,
-                festivalRepository = festivalApplication().container.festivalRepository
+                // festivalName has a default value "Festival-Nouveau" in the VM constructor
             )
         }
 
