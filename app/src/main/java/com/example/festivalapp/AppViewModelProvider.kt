@@ -43,13 +43,6 @@ object AppViewModelProvider {
             EditorListViewModel(editorRepository = festivalApplication().container.editorRepository)
         }
 
-        initializer {
-            ReservationDetailViewModel(
-                reservationRepository = festivalApplication().container.reservationRepository,
-                gameRepository = festivalApplication().container.gameRepository,
-                savedStateHandle = this.createSavedStateHandle()
-            )
-        }
     }
 }
 

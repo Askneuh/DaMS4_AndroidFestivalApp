@@ -1,6 +1,5 @@
 package com.example.festivalapp.ui.screen.reservation
 
-import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.festivalapp.data.game.room.Game
@@ -42,9 +41,8 @@ sealed interface NetworkState {
 class ReservationDetailViewModel(
     private val reservationRepository: ReservationRepository,
     private val gameRepository: GameRepository,
-    savedStateHandle: SavedStateHandle
+    private val reservationId: Int
 ): ViewModel() {
-    private val reservationId: Int = checkNotNull(savedStateHandle["reservationId"])
 
     private val _networkState = MutableStateFlow<NetworkState>(NetworkState.Loading)
     val networkState = _networkState.asStateFlow()

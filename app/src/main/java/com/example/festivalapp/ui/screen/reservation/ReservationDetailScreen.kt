@@ -17,8 +17,10 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.example.festivalapp.AppViewModelProvider
+import com.example.festivalapp.data.game.room.GameRepository
 import com.example.festivalapp.data.game.room.Game
 import com.example.festivalapp.data.reservation.room.GameWithReservationInfo
 import com.example.festivalapp.data.reservation.room.Reservation
@@ -43,17 +45,12 @@ val mockZone = TariffZoneMock(
 
 @Composable
 fun ReservationDetailScreen(
-    reservationId: Int,
+    viewModel: ReservationDetailViewModel,
     onNavigateBack: () -> Unit
 ) {
-    val viewModel: ReservationDetailViewModel = viewModel(factory = AppViewModelProvider.Factory)
-
     val uiState by viewModel.uiState.collectAsState()
     val availableGames by viewModel.availableGames.collectAsState()
 
-    // On s'assure que le ViewModel est branché sur le bon ID si ce n'est pas déjà fait
-    // Normalement via SavedStateHandle, mais on peut forcer ici si besoin
-    
     ReservationDetailScreenContent(
         uiState = uiState,
         allAvailableGames = availableGames,
@@ -452,5 +449,34 @@ fun GameSelectorDialog(
         confirmButton = {
             TextButton(onClick = onDismiss) { Text("Fermer") }
         }
+    )
+}
+
+@Composable
+fun ReservationDetailRoute(
+    reservationRepository: ReservationRepository,
+    gameRepository: GameRepository,
+    reservationId: Int,
+    onNavigateBack: () -> Unit
+) {
+    val factory = object : ViewModelProvider.Factory {
+        override fun <T : ViewModel> create(modelClass: Class<T>): T {
+            @Suppress("UNCHECKED_CAST")
+            return ReservationDetailViewModel(
+                reservationRepository = reservationRepository,
+                gameRepository = gameRepository,
+                reservationId = reservationId
+            ) as T
+        }
+    }
+
+    val viewModel: ReservationDetailViewModel = viewModel(
+        key = "reservation_$reservationId",
+        factory = factory
+    )
+
+    ReservationDetailScreen(
+        viewModel = viewModel,
+        onNavigateBack = onNavigateBack
     )
 }
