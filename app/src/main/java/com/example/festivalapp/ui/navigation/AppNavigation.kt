@@ -32,9 +32,10 @@ import com.example.festivalapp.ui.screen.festival.FestivalCreateScreen
 import com.example.festivalapp.ui.screen.editor.EditorListRoute
 import com.example.festivalapp.ui.screen.editor.EditorDetailRoute
 import com.example.festivalapp.ui.screen.reservation.ReservationOverviewScreen
-import com.example.festivalapp.ui.screen.reservation.ReservationDetailScreen
+import com.example.festivalapp.ui.screen.reservation.ReservationDetailRoute
 import com.example.festivalapp.ui.screen.reservation.FestivalGamesListScreen
 import com.example.festivalapp.ui.screen.home.HomeScreen
+import com.example.festivalapp.ui.screen.reservation.ReservationListRoute
 import com.example.festivalapp.ui.screen.settings.SettingsScreen
 
 @Composable
@@ -48,6 +49,13 @@ fun AppNavigation(
     val authToken by sessionRepository.accessCookieFlow.collectAsState(initial = null)
     val isAuthenticated = authToken != null
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
+
+    // Redirection automatique vers Home si le token est disponible au démarrage
+    LaunchedEffect(authToken) {
+        if (authToken != null && model.backStack.last() is AppDestinations.Login) {
+            controller.navigateTo(AppDestinations.Home)
+        }
+    }
     val context = LocalContext.current
     val app = context.applicationContext as FestivalApplication
 
@@ -174,7 +182,9 @@ fun AppNavigation(
                     )
                 }
                 is AppDestinations.ReservationDetail -> NavEntry(key) {
-                    ReservationDetailScreen(
+                    ReservationDetailRoute(
+                        reservationRepository = app.container.reservationRepository,
+                        gameRepository = app.container.gameRepository,
                         reservationId = key.reservationId,
                         onNavigateBack = { controller.navigateBack() }
                     )
