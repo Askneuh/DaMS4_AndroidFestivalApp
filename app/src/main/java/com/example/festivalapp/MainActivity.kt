@@ -20,13 +20,7 @@ import com.example.festivalapp.ui.theme.FestivalAppTheme
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-<<<<<<< HEAD
-        
         val container = (application as FestivalApplication).container
-=======
-        val app = application as FestivalApplication
-
->>>>>>> 82c0fb8 (a lot of things)
 
         enableEdgeToEdge()
         setContent {
@@ -40,12 +34,11 @@ class MainActivity : ComponentActivity() {
                 )
             }
 
-<<<<<<< HEAD
             val themeMode = navigationModel.themeMode
             val darkTheme = when (themeMode) {
                 ThemeMode.Light -> false
                 ThemeMode.Dark -> true
-                ThemeMode.System -> androidx.compose.foundation.isSystemInDarkTheme()
+                ThemeMode.System -> isSystemInDarkTheme()
             }
 
             FestivalAppTheme(darkTheme = darkTheme) {
@@ -59,33 +52,6 @@ class MainActivity : ComponentActivity() {
                             sessionRepository = container.sessionRepository
                         )
                     }
-=======
-                if (role != null) {
-                    val scope = rememberCoroutineScope()
-                    var selectedReservationId by remember { mutableStateOf<Int?>(null) }
-
-                    if (selectedReservationId == null) {
-                        ReservationListRoute(
-                            reservationRepository = app.container.reservationRepository,
-                            festivalName = "Festival-Nouveau",
-                            onLogoutClick = {
-                                scope.launch { app.container.sessionRepository.clearSession() }
-                            },
-                            onReservationClick = { id -> selectedReservationId = id }
-                        )
-                    } else {
-                        ReservationDetailRoute(
-                            reservationId = selectedReservationId!!,
-                            reservationRepository = app.container.reservationRepository,
-                            onBack = { selectedReservationId = null }
-                        )
-                    }
-
-                } else {
-                    LoginRoute(
-                        onLoginSuccess = {}
-                    )
->>>>>>> 82c0fb8 (a lot of things)
                 }
             }
         }
