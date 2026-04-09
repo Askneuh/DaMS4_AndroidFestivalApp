@@ -27,4 +27,7 @@ interface TariffZoneDao {
 
     @Query("DELETE FROM tariff_zone WHERE id = :zoneId")
     suspend fun deleteZoneById(zoneId: Int)
-}
+
+    @Query("SELECT * FROM tariff_zone WHERE idTZ = :idTZ LIMIT 1")
+    fun getZoneById(idTZ: Int): Flow<TariffZoneEntity?>
+}

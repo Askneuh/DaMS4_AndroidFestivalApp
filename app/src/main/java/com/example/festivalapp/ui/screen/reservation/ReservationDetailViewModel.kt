@@ -1,6 +1,5 @@
 package com.example.festivalapp.ui.screen.reservation
 
-import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.festivalapp.data.game.room.Game
@@ -16,7 +15,6 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import kotlin.collections.emptyList
-import android.util.Log
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -42,9 +40,8 @@ sealed interface NetworkState {
 class ReservationDetailViewModel(
     private val reservationRepository: ReservationRepository,
     private val gameRepository: GameRepository,
-    savedStateHandle: SavedStateHandle
+    private val reservationId: Int
 ): ViewModel() {
-    private val reservationId: Int = checkNotNull(savedStateHandle["reservationId"])
 
     private val _networkState = MutableStateFlow<NetworkState>(NetworkState.Loading)
     val networkState = _networkState.asStateFlow()

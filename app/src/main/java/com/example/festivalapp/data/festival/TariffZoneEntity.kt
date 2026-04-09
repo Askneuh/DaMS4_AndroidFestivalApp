@@ -29,3 +29,16 @@ data class TariffZoneEntity(
     val cityHallTablePrice: Double? = null,
     val squareMeterPrice: Double? = null
 )
+
+fun TariffZoneEntity.toTariffZone(): TariffZone = TariffZone(
+    idTZ = this.idTZ,
+    name = this.name,
+    festivalName = this.festivalName,
+    nbSmallTables = this.nbSmallTables,
+    nbLargeTables = this.nbLargeTables,
+    nbCityHallTables = this.nbCityHallTables,
+    smallTablePrice = this.smallTablePrice,
+    largeTablePrice = this.largeTablePrice,
+    cityHallTablePrice = this.cityHallTablePrice,
+    squareMeterPrice = this.squareMeterPrice
+)
