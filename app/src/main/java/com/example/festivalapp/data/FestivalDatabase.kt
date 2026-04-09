@@ -12,6 +12,7 @@ import com.example.festivalapp.data.festival.TariffZoneDao
 import com.example.festivalapp.data.festival.TariffZoneEntity
 import com.example.festivalapp.data.festival.PlanZoneDao
 import com.example.festivalapp.data.festival.PlanZoneEntity
+import com.example.festivalapp.data.festival.room.FestivalGameEntity
 import com.example.festivalapp.data.reservation.room.Reservation
 import com.example.festivalapp.data.reservation.room.ReservationDAO
 import com.example.festivalapp.data.user.room.User
@@ -26,7 +27,7 @@ import com.example.festivalapp.data.user.room.UserDAO
         GameEntity::class,
         FestivalGameEntity::class,
         Reservation::class,
-        Editor::class
+        Editor::class,
         PlanZoneEntity::class
     ],
     version = 4,
@@ -34,7 +35,7 @@ import com.example.festivalapp.data.user.room.UserDAO
 )
 abstract class FestivalDatabase: RoomDatabase() {
 
-    // DAOs
+    // === Tes DAO ===
     abstract fun festivalDao(): FestivalDao
     abstract fun tariffZoneDao(): TariffZoneDao
     abstract fun planZoneDao(): PlanZoneDao
