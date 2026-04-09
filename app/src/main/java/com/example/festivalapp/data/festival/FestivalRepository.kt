@@ -125,13 +125,21 @@ class FestivalRepository(
 
     suspend fun setCurrentFestival(name: String): Result<Festival> {
         return try {
-            val localFestival = festivalDao.getFestivalWithZonesByName(name).firstOrNull()?.toFestival()
+            // 1️⃣ Mise à jour locale atomique
+            festivalDao.setOnlyThisAsCurrent(name)
+            
+            // 2️⃣ Récupération de l'objet mis à jour pour le retour
+            val updatedFestival = festivalDao.getFestivalWithZonesByName(name).firstOrNull()?.toFestival()
+
             try {
+                // 3️⃣ Synchronisation API
                 val apiResult = apiService.setCurrentFestival(name)
-                festivalDao.updateFestival(apiResult.toEntity())
+                // On ré-insère au cas où l'API a renvoyé des infos plus fraîches
+                festivalDao.insertFestival(apiResult.toEntity())
                 Result.success(apiResult)
             } catch (apiError: Exception) {
-                Result.success(localFestival ?: Festival())
+                // Si l'API échoue, on a au moins la version locale à jour
+                Result.success(updatedFestival ?: Festival())
             }
         } catch (e: Exception) {
             Result.failure(e)

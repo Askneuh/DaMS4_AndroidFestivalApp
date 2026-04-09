@@ -9,7 +9,13 @@ import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
+import com.example.festivalapp.data.festival.FestivalRepository
+import kotlinx.coroutines.flow.filterNotNull
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 
 sealed interface ReservationListUiState {
     object Loading : ReservationListUiState
@@ -17,9 +23,10 @@ sealed interface ReservationListUiState {
     data class Error(val message: String) : ReservationListUiState
 }
 
+@OptIn(ExperimentalCoroutinesApi::class)
 class ReservationListViewModel(
     private val reservationRepository: ReservationRepository,
-    private val festivalName: String = "Festival-Nouveau" // Le festival courant est passé à l'initialisation
+    private val festivalRepository: FestivalRepository
 ) : ViewModel() {
 
     // --- État réseau (Loading / Success / Error) ---
@@ -30,15 +37,27 @@ class ReservationListViewModel(
     val searchQuery = MutableStateFlow("")
     val statusFilter = MutableStateFlow("all")
 
-    // --- Flux brut depuis Room ---
-    private val _allItems = reservationRepository.getEditorsWithReservations(festivalName)
+    // --- Flux du nom du festival courant ---
+    private val _currentFestivalName = festivalRepository.getCurrentFestival()
+        .filterNotNull()
+        .map { it.name }
         .stateIn(
             scope = viewModelScope,
             started = SharingStarted.WhileSubscribed(5000L),
-            initialValue = emptyList()
+            initialValue = ""
         )
 
-    // --- Flux filtré (combine les données + les filtres en temps réel) ---
+    // --- Flux brut depuis Room (réagit au changement de nom) ---
+    private val _allItems = _currentFestivalName.flatMapLatest { name ->
+        if (name.isBlank()) kotlinx.coroutines.flow.flowOf(emptyList())
+        else reservationRepository.getEditorsWithReservations(name)
+    }.stateIn(
+        scope = viewModelScope,
+        started = SharingStarted.WhileSubscribed(5000L),
+        initialValue = emptyList()
+    )
+
+    // --- Flux filtré ---
     val filteredItems: StateFlow<List<EditorWithReservationTuple>> =
         combine(_allItems, searchQuery, statusFilter) { items, query, status ->
             items
@@ -55,14 +74,22 @@ class ReservationListViewModel(
         )
 
     init {
-        refresh()
+        // Au démarrage et à chaque changement de festival, on tente un refresh
+        _currentFestivalName.onEach { name ->
+            if (name.isNotBlank()) {
+                refresh(name)
+            }
+        }.launchIn(viewModelScope)
     }
 
-    fun refresh() {
+    fun refresh(name: String? = null) {
+        val targetName = name ?: _currentFestivalName.value
+        if (targetName.isBlank()) return
+
         viewModelScope.launch {
             _networkState.value = ReservationListUiState.Loading
             try {
-                reservationRepository.refreshFromNetwork(festivalName)
+                reservationRepository.refreshFromNetwork(targetName)
                 _networkState.value = ReservationListUiState.Success
             } catch (e: Exception) {
                 _networkState.value = ReservationListUiState.Error("Erreur réseau: ${e.message}")

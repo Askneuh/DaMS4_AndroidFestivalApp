@@ -23,6 +23,7 @@ class FestivalViewModel(
 
     init {
         loadAllFestivals()
+        loadCurrentFestival()
         syncFestivalsFromApi()
     }
 

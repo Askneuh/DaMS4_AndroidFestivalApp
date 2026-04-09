@@ -48,4 +48,16 @@ interface FestivalDao {
     
     @Query("DELETE FROM festival WHERE name = :name")
     suspend fun deleteFestivalByName(name: String)
-}
+
+    @Query("UPDATE festival SET isCurrent = 0")
+    suspend fun clearCurrentFestival()
+
+    @Query("UPDATE festival SET isCurrent = 1 WHERE name = :name")
+    suspend fun markFestivalAsCurrent(name: String)
+
+    @Transaction
+    suspend fun setOnlyThisAsCurrent(name: String) {
+        clearCurrentFestival()
+        markFestivalAsCurrent(name)
+    }
+}

@@ -22,7 +22,10 @@ object AppViewModelProvider {
         }
 
         initializer {
-            ReservationListViewModel(reservationRepository = festivalApplication().container.reservationRepository)
+            ReservationListViewModel(
+                reservationRepository = festivalApplication().container.reservationRepository,
+                festivalRepository = festivalApplication().container.festivalRepository
+            )
         }
 
         initializer {
