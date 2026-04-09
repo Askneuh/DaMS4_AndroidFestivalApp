@@ -11,8 +11,7 @@ import androidx.room.*
             childColumns = ["festivalName"],
             onDelete = ForeignKey.CASCADE
         )
-    ],
-    indices = [Index(value = ["festivalName"])]
+    ]
 )
 data class PlanZoneEntity(
     @PrimaryKey(autoGenerate = true)
@@ -20,5 +19,5 @@ data class PlanZoneEntity(
     val name: String,
     val nbTables: Int,
     val festivalName: String,
-    val tariffZoneId: Int
+    val tariffZoneId: Int // ID de la TariffZoneEntity liée
 )

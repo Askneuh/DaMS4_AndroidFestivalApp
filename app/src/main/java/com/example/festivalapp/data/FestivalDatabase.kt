@@ -8,27 +8,39 @@ import com.example.festivalapp.data.reservation.room.*
 import com.example.festivalapp.data.user.room.*
 import com.example.festivalapp.data.publisher.room.*
 import com.example.festivalapp.data.festival.FestivalEntity
+import com.example.festivalapp.data.festival.TariffZoneDao
+import com.example.festivalapp.data.festival.TariffZoneEntity
+import com.example.festivalapp.data.festival.PlanZoneDao
+import com.example.festivalapp.data.festival.PlanZoneEntity
 import com.example.festivalapp.data.festival.room.FestivalGameEntity
+import com.example.festivalapp.data.reservation.room.Reservation
+import com.example.festivalapp.data.reservation.room.ReservationDAO
+import com.example.festivalapp.data.user.room.User
+import com.example.festivalapp.data.user.room.UserDAO
 
 @Database(
     entities = [
-        User::class, 
-        FestivalEntity::class, 
+        User::class,
+        FestivalEntity::class,
         TariffZoneEntity::class,
-        PublisherEntity::class, 
-        GameEntity::class, 
+        PublisherEntity::class,
+        GameEntity::class,
         FestivalGameEntity::class,
         Reservation::class,
-        Editor::class
-    ], 
-    version = 2, 
+        Editor::class,
+        PlanZoneEntity::class
+    ],
+    version = 3, 
     exportSchema = false
 )
 abstract class FestivalDatabase: RoomDatabase() {
 
-    // DAOs
+    // === Tes DAO ===
     abstract fun festivalDao(): FestivalDao
     abstract fun tariffZoneDao(): TariffZoneDao
+    abstract fun planZoneDao(): PlanZoneDao
+
+    // === Les DAO de l'équipe ===
     abstract fun userDAO(): UserDAO
     abstract fun publisherDAO(): PublisherDAO
     abstract fun gameDAO(): GameDAO

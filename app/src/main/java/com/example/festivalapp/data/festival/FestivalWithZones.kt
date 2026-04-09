@@ -9,5 +9,12 @@ data class FestivalWithZones(
         parentColumn = "name",
         entityColumn = "festivalName"
     )
-    val zones: List<TariffZoneEntity>
+    val zones: List<TariffZoneEntity>,
+
+    @Relation(
+        parentColumn = "name",
+        entityColumn = "festivalName"
+    )
+    val planZones: List<PlanZoneEntity>
 )
+

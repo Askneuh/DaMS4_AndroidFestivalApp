@@ -1,7 +1,6 @@
 package com.example.festivalapp
 
 import android.os.Bundle
-import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
@@ -22,17 +21,17 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         
         val container = (application as FestivalApplication).container
-        
+
         enableEdgeToEdge()
         setContent {
             val scope = rememberCoroutineScope()
             val navigationModel = remember { NavigationModel() }
-            val navigationController = remember(navigationModel) { 
+            val navigationController = remember(navigationModel) {
                 NavigationController(
                     navigationModel,
                     container.userPreferences,
                     scope
-                ) 
+                )
             }
 
             val themeMode = navigationModel.themeMode

@@ -53,6 +53,7 @@ class AppDataContainer(private val context: Context) : AppContainer {
         FestivalRepository(
             festivalDao = FestivalDatabase.getDatabase(context).festivalDao(),
             tariffZoneDao = FestivalDatabase.getDatabase(context).tariffZoneDao(),
+            planZoneDao = FestivalDatabase.getDatabase(context).planZoneDao(),
             apiService = RetrofitInstance.api
         )
     }
